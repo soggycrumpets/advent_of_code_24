@@ -1,0 +1,31 @@
+diff maindata_1.txt brutedata.txt
+
+25c25
+< 25 | is safe: false
+---
+> 25 | is safe: true
+149c149
+< 149 | is safe: false
+---
+> 149 | is safe: true
+273c273
+< 273 | is safe: false
+---
+> 273 | is safe: true
+397c397
+< 397 | is safe: false
+---
+> 397 | is safe: true
+509c509
+< 509 | is safe: false
+---
+> 509 | is safe: true
+579c579
+< 579 | is safe: false
+---
+> 579 | is safe: true
+1000c1000
+< 1000 | is safe: true
+---
+> 1000 | is safe: true
+\ No newline at end of file
