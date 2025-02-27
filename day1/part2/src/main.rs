@@ -28,7 +28,7 @@ fn main() {
         nums1_vec.push(string_separated.next().unwrap().to_string().parse().unwrap());
 
         // Calling the next time inserts into second vec
-        nums_vec_2.push(string_separated.next().unwrap().to_string().parse().unwrap());
+        nums2_vec.push(string_separated.next().unwrap().to_string().parse().unwrap());
     }
 
     // Sort vectors from low to high value
