@@ -161,25 +161,23 @@ fn move_guard(guard: &mut Guard, grid: &mut Vec<Vec<char>>, is_ghost: bool) -> b
         return true;
     }
 
-
     // Move forward
     guard.x += dx;
     guard.y += dy;
 
     // Mark the guard's current spot (unless it is a potential obstacle spot - keep that there)
-    /*     if !is_ghost {
+    if !is_ghost {
         let grid_char = &mut grid[guard.y as usize][guard.x as usize];
         *grid_char = match *grid_char {
             '|' | '-' => '+',
             'O' => 'O',
-            'X' => 'X',
             '^' | '>' | '<' | 'v' => *grid_char,
             _ => match guard.direction {
                 Direction::Up | Direction::Down => '|',
                 Direction::Left | Direction::Right => '-',
             },
         };
-    } */
+    }
 
     return true;
 }
@@ -196,15 +194,7 @@ fn send_ghost_guard(
     if !in_array_bounds(x0 + dx, y0 + dy, grid) {
         return false;
     }
-    if grid[(y0 + dy) as usize][(x0 + dx) as usize] == '#' {
-        return false;
-    }
-
-    // If this tiled has already been tried, do not try it again! The previous assessment takes priority
-    if grid[(y0 + dy) as usize][(x0 + dx) as usize] == 'X' {
-        return false;
-    }  
-    if grid[(y0 + dy) as usize][(x0 + dx) as usize] == 'O' {
+    if grid[(y0 + dy) as usize][(x0 + dx) as usize] != '.' {
         return false;
     }
 
@@ -228,12 +218,11 @@ fn send_ghost_guard(
         grid[(y0 + dy) as usize][(x0 + dx) as usize] = 'O';
         return true;
     }
-    // Otherwise, return that location to its original state
+    // Otherwise, remove the temporary '#' to return the grid to normal
     else {
-        // ************* If the guard doesn't get stuck here, this spot won't work. Mark it with an X so we don't try it again!!!!!!! ***************
-        grid[(y0 + dy) as usize][(x0 + dx) as usize] = 'X';
-        return false;
+        grid[(y0 + dy) as usize][(x0 + dx) as usize] = '.';
     }
+    return false;
 }
 
 fn sum_spaces(grid: &Vec<Vec<char>>) -> (i32, i32) {
@@ -259,31 +248,13 @@ fn sum_spaces(grid: &Vec<Vec<char>>) -> (i32, i32) {
 fn main() {
     let mut grid = read_file_to_array(_INPUT);
     let mut guard = get_guard(&grid);
-    // Record guard's starting space
-    let (x0, y0) = (guard.x, guard.y);
-    while move_guard(&mut guard, &mut grid, false) {}
 
-    // Starting space cannot be an obstacle. If it was an obstacle, revert it.
-    if grid[y0 as usize][x0 as usize] == 'O' {
-        grid[y0 as usize][x0 as usize] = 'X';
-    }
+    // Record guard's starting space
+    while move_guard(&mut guard, &mut grid, false) {}
 
     let sum = sum_spaces(&grid);
 
-    /*     let solution = read_file_to_array("solution");
-    for i in 0..grid.len() {
-        for j in 0..grid[0].len() {
-            if solution[i][j] == 'O' && grid[i][j] != 'O' {
-                grid[i][j] = '!';
-            }
-            if grid[i][j] == 'O' && solution[i][j] == 'O' {
-                grid[i][j] = 'X';
-            }
-        }
-    } */
-
     print_grid(&grid);
-    println!("Guard Position: ({}, {})", guard.y, guard.x);
     println!("Total Spaces Visited: {}", sum.0);
     println!("Total Obstacle Spots: {}", sum.1);
 }
@@ -295,16 +266,6 @@ mod tests {
     const TEST_INPUT: &str = "test_input";
     const TEST_COMPLEX_LOOP: &str = "test_complex_loop";
     const TEST_FALSE_POSITIVE: &str = "test_false_positive";
-
-    fn err_print_grid(grid: &Vec<Vec<char>>) {
-        for row in grid {
-            for c in row {
-                eprint!("{}", c);
-            }
-            eprintln!();
-        }
-        eprintln!();
-    }
 
     #[test]
     fn can_find_guard() {
@@ -338,7 +299,6 @@ mod tests {
         let mut guard = get_guard(&grid);
         while move_guard(&mut guard, &mut grid, false) {}
         let obstacles: i32 = sum_spaces(&grid).1;
-        print_grid(&grid);
         assert_eq!(obstacles, 6);
     }
 
@@ -346,7 +306,6 @@ mod tests {
     fn test_ghost_guard() {
         let mut grid = read_file_to_array(TEST_INPUT);
         let detected_obstacle = send_ghost_guard(7, 8, Direction::Down, &mut grid);
-        // print_grid(&grid);
         assert_eq!(detected_obstacle, true)
     }
 

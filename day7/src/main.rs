@@ -27,13 +27,15 @@ fn read_file_to_array(name: &str) -> Vec<Vec<i64>> {
     array
 }
 
-fn compute_op_combinations(mut eqn: Vec<i64>) -> Option<i64> {
+// Computes the result of every possible combination of '+' and '*' operations and compares to the target number
+// If any combination results in the target number, return the target number
+// Otherwise, return None
+fn _compute_op_combinations(mut eqn: Vec<i64>) -> Option<i64> {
     // Remove the first element from the vector and use that as the target
     let target: i64 = eqn.remove(0);
 
     let ops_len = eqn.len() - 1;
 
-    let mut solutions: Vec<i64> = Vec::new();
     let mut result: Option<i64> = None;
 
     for i in 0..2 << ops_len - 1 {
@@ -48,9 +50,9 @@ fn compute_op_combinations(mut eqn: Vec<i64>) -> Option<i64> {
                 // eprint!("+ {} ", eqn[j + 1]);
             }
         }
-        solutions.push(total);
         if total == target {
             result = Some(target);
+            return result
             // eprint!("| match");
         }
         // eprintln!("= {}", total);
@@ -59,6 +61,8 @@ fn compute_op_combinations(mut eqn: Vec<i64>) -> Option<i64> {
     result
 }
 
+// This function works the same was as "compute_op_combinations", except that it computes every possible
+// combination of '+', '*', AND '||'.
 fn compute_op_combinations_with_cat(mut eqn: Vec<i64>) -> Option<i64> {
     // Remove the first element from the vector and use that as the target
     let target: i64 = eqn.remove(0);
@@ -74,11 +78,11 @@ fn compute_op_combinations_with_cat(mut eqn: Vec<i64>) -> Option<i64> {
             let i_ternary = to_ternary(i as i32, ops_len);
             match i_ternary[i_ternary.len() - 1 - j ] {
                 0 => {
-                    total += eqn[j as usize + 1];
+                    total += eqn[j + 1];
                     // eprint!("+ {} ", eqn[j + 1])
                 }
                 1 => {
-                    total *= eqn[j as usize + 1];
+                    total *= eqn[j + 1];
                     // eprint!("* {} ", eqn[j + 1])
                 }
                 2 => {
@@ -146,7 +150,7 @@ mod tests {
 
         let mut sum = 0;
         for eqn in array {
-            let result = compute_op_combinations(eqn);
+            let result = _compute_op_combinations(eqn);
 
             match result {
                 Some(value) => sum += value,
