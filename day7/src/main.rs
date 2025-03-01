@@ -162,6 +162,23 @@ mod tests {
     }
 
     #[test]
+    fn pass_part_1() {
+        let array = read_file_to_array(INPUT);
+
+        let mut sum = 0;
+        for eqn in array {
+            let result = _compute_op_combinations(eqn);
+
+            match result {
+                Some(value) => sum += value,
+                None => (),
+            }
+        }
+
+
+    }
+
+    #[test]
     fn pass_website_example_2() {
         let array = read_file_to_array(_TEST_INPUT);
 

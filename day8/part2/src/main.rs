@@ -41,7 +41,7 @@ fn get_antenna_table(char_array: &Vec<Vec<char>>) -> HashMap<char, Vec<Position>
     let mut antenna_table: HashMap<char, Vec<Position>> = HashMap::new();
 
     for i in 0..char_array.len() {
-        for j in 0..char_array.len() {
+        for j in 0..char_array[0].len() {
             let frequency = char_array[i][j];
             if frequency == '.' {
                 continue;

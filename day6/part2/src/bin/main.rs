@@ -29,7 +29,6 @@ struct Guard {
     x: i32,
     y: i32,
     direction: Direction,
-    next_direction: Direction,
     bonk_table: HashMap<(i32, i32, Direction), bool>,
     caught_in_loop: bool,
 }
@@ -50,7 +49,6 @@ fn get_guard(grid: &Vec<Vec<char>>) -> Guard {
         y: 0,
         x: 0,
         direction: Direction::Up,
-        next_direction: Direction::Up,
         bonk_table: HashMap::new(),
         caught_in_loop: false,
     };
@@ -76,7 +74,6 @@ fn get_guard(grid: &Vec<Vec<char>>) -> Guard {
                         }
                         _ => (),
                     }
-                    guard.next_direction = get_next_direction(guard.direction);
                     break;
                 }
                 _ => (),
@@ -141,7 +138,7 @@ fn move_guard(guard: &mut Guard, grid: &mut Vec<Vec<char>>, is_ghost: bool) -> b
     // Guard hits wall - rotate 90 degrees to the right
     // Will not more forward or change the symbol of the space it's on
     if (grid[(guard.y + dy) as usize][(guard.x + dx) as usize]) == '#' {
-        // Check bonk table: if the bonk is in the table, the guard is caught in an infinite loop!
+        // Check & update bonk table: if the bonk is in the table, the guard is caught in an infinite loop!
         match guard
             .bonk_table
             .get(&(guard.x + dx, guard.y + dy, guard.direction))
@@ -157,7 +154,6 @@ fn move_guard(guard: &mut Guard, grid: &mut Vec<Vec<char>>, is_ghost: bool) -> b
         }
 
         guard.direction = get_next_direction(guard.direction);
-        guard.next_direction = get_next_direction(guard.next_direction);
         return true;
     }
 
@@ -165,7 +161,7 @@ fn move_guard(guard: &mut Guard, grid: &mut Vec<Vec<char>>, is_ghost: bool) -> b
     guard.x += dx;
     guard.y += dy;
 
-    // Mark the guard's current spot (unless it is a potential obstacle spot - keep that there)
+    // Mark the guard's current spot
     if !is_ghost {
         let grid_char = &mut grid[guard.y as usize][guard.x as usize];
         *grid_char = match *grid_char {
@@ -194,6 +190,7 @@ fn send_ghost_guard(
     if !in_array_bounds(x0 + dx, y0 + dy, grid) {
         return false;
     }
+    // The only valid spaces to check are unvisited, empty spaces
     if grid[(y0 + dy) as usize][(x0 + dx) as usize] != '.' {
         return false;
     }
@@ -202,7 +199,6 @@ fn send_ghost_guard(
         y: y0,
         x: x0,
         direction: direction_initial,
-        next_direction: get_next_direction(direction_initial),
         bonk_table: HashMap::new(),
         caught_in_loop: false,
     };
@@ -249,7 +245,6 @@ fn main() {
     let mut grid = read_file_to_array(_INPUT);
     let mut guard = get_guard(&grid);
 
-    // Record guard's starting space
     while move_guard(&mut guard, &mut grid, false) {}
 
     let sum = sum_spaces(&grid);
