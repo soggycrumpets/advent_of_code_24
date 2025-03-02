@@ -265,12 +265,12 @@ fn main() {
                 while move_guard(&mut guard_copy, &mut grid_copy, false) && !guard_copy.caught_in_loop {}
             }
             if guard_copy.caught_in_loop {
-                println!("Success");
+                // println!("Success");
                 obstacles += 1;
                 grid[i][j] = 'O'
             }
             else {
-                println!("Failure");
+                // println!("Failure");
             }
         }
     }
