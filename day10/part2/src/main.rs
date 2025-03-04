@@ -94,7 +94,7 @@ fn get_next_position(position: Position, direction: Direction) -> Position {
     next_position
 }
 
-// Helper function for search_for_path
+// Helper function for "search_for_path"
 fn search_in_direction(
     position: Position,
     next_direction: Direction,
@@ -112,8 +112,7 @@ fn search_in_direction(
     score
 }
 
-// Searches for a path, given a position and a direction that was travelled from.
-// This function is recursive and will call itself until it exhaustively searches the trail.
+// Recursively searches for a path, given a position and a direction that was travelled from.
 // Returns score, which is equal to the number of trail ends connected to the trail.
 fn search_for_path(
     map: &Vec<Vec<i32>>,

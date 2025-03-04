@@ -89,7 +89,7 @@ fn compute_op_combinations_with_cat(mut eqn: Vec<i64>) -> Option<i64> {
                     total = cat(total, eqn[j+1]);
                     // eprint!("|| {} ", eqn[j + 1]);
                 }
-                _ => panic!("Ternary digit greater than 2! i_ternary[{}] = {}", j, i_ternary[j+1]),
+                _ => panic!("Ternary digit greater than 2! i_ternary[{}] = {}", i_ternary.len() - 1 - j, i_ternary[j+1]),
             }
         }
         if total == target {
@@ -163,7 +163,7 @@ mod tests {
 
     #[test]
     fn pass_part_1() {
-        let array = read_file_to_array(INPUT);
+        let array = read_file_to_array(_INPUT);
 
         let mut sum = 0;
         for eqn in array {
