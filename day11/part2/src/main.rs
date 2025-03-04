@@ -28,6 +28,7 @@ fn num_to_digits(num: i64) -> Vec<i64> {
         digits.push(remainder % 10);
         remainder /= 10;
     }
+
     digits.push(remainder);
     digits.reverse();
 
@@ -37,6 +38,7 @@ fn num_to_digits(num: i64) -> Vec<i64> {
 fn digits_to_num(digits: Vec<i64>) -> i64 {
     let mut num: i64 = 0;
     let mut i = 0;
+
     for digit in digits.iter().rev() {
         num += digit * 10_i64.pow(i);
         i += 1;
@@ -47,6 +49,7 @@ fn digits_to_num(digits: Vec<i64>) -> i64 {
 
 fn digits_are_even(num: i64) -> bool {
     let mut digit_count = 0;
+
     for _digit in num_to_digits(num) {
         digit_count += 1;
     }
@@ -79,6 +82,7 @@ fn insert_or_increment(stones: &mut HashMap<i64, i64>, stone: i64, number_of_sto
 
 // Switched from a vector in part 1 to a hashmap, so every stone with the same number is calculated at once
 fn blink(stones: &mut HashMap<i64, i64>) {
+
     // Clone the hashmap and clear the original. Repopulate the original using the clone
     let stones_this_blink = stones.clone();
     stones.clear();
