@@ -1,0 +1,321 @@
+SUCCESS | A presses: 21, B presses: 70, Cost: 133
+FAILURE
+FAILURE
+SUCCESS | A presses: 15, B presses: 10, Cost: 55
+SUCCESS | A presses: 57, B presses: 29, Cost: 200
+SUCCESS | A presses: 42, B presses: 60, Cost: 186
+FAILURE
+FAILURE
+SUCCESS | A presses: 74, B presses: 12, Cost: 234
+SUCCESS | A presses: 75, B presses: 52, Cost: 277
+FAILURE
+SUCCESS | A presses: 84, B presses: 92, Cost: 344
+SUCCESS | A presses: 92, B presses: 50, Cost: 326
+SUCCESS | A presses: 38, B presses: 38, Cost: 152
+FAILURE
+FAILURE
+SUCCESS | A presses: 82, B presses: 45, Cost: 291
+SUCCESS | A presses: 35, B presses: 68, Cost: 173
+SUCCESS | A presses: 35, B presses: 3, Cost: 108
+FAILURE
+SUCCESS | A presses: 16, B presses: 5, Cost: 53
+SUCCESS | A presses: 8, B presses: 59, Cost: 83
+SUCCESS | A presses: 16, B presses: 30, Cost: 78
+SUCCESS | A presses: 58, B presses: 11, Cost: 185
+SUCCESS | A presses: 73, B presses: 98, Cost: 317
+SUCCESS | A presses: 8, B presses: 36, Cost: 60
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 43, B presses: 83, Cost: 212
+SUCCESS | A presses: 93, B presses: 46, Cost: 325
+FAILURE
+SUCCESS | A presses: 67, B presses: 12, Cost: 213
+FAILURE
+SUCCESS | A presses: 99, B presses: 96, Cost: 393
+SUCCESS | A presses: 75, B presses: 84, Cost: 309
+FAILURE
+FAILURE
+SUCCESS | A presses: 33, B presses: 52, Cost: 151
+SUCCESS | A presses: 76, B presses: 43, Cost: 271
+FAILURE
+SUCCESS | A presses: 31, B presses: 51, Cost: 144
+SUCCESS | A presses: 12, B presses: 92, Cost: 128
+SUCCESS | A presses: 50, B presses: 24, Cost: 174
+FAILURE
+FAILURE
+SUCCESS | A presses: 27, B presses: 14, Cost: 95
+SUCCESS | A presses: 51, B presses: 4, Cost: 157
+FAILURE
+SUCCESS | A presses: 9, B presses: 65, Cost: 92
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 17, B presses: 31, Cost: 82
+FAILURE
+SUCCESS | A presses: 33, B presses: 11, Cost: 110
+SUCCESS | A presses: 30, B presses: 57, Cost: 147
+SUCCESS | A presses: 76, B presses: 49, Cost: 277
+SUCCESS | A presses: 79, B presses: 94, Cost: 331
+SUCCESS | A presses: 7, B presses: 12, Cost: 33
+FAILURE
+FAILURE
+SUCCESS | A presses: 58, B presses: 74, Cost: 248
+SUCCESS | A presses: 33, B presses: 43, Cost: 142
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 9, B presses: 89, Cost: 116
+FAILURE
+SUCCESS | A presses: 12, B presses: 6, Cost: 42
+SUCCESS | A presses: 90, B presses: 9, Cost: 279
+SUCCESS | A presses: 76, B presses: 53, Cost: 281
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 30, B presses: 40, Cost: 130
+SUCCESS | A presses: 76, B presses: 94, Cost: 322
+FAILURE
+SUCCESS | A presses: 61, B presses: 22, Cost: 205
+SUCCESS | A presses: 23, B presses: 3, Cost: 72
+SUCCESS | A presses: 97, B presses: 94, Cost: 385
+FAILURE
+SUCCESS | A presses: 14, B presses: 19, Cost: 61
+FAILURE
+SUCCESS | A presses: 51, B presses: 73, Cost: 226
+FAILURE
+SUCCESS | A presses: 80, B presses: 56, Cost: 296
+SUCCESS | A presses: 75, B presses: 19, Cost: 244
+SUCCESS | A presses: 75, B presses: 62, Cost: 287
+SUCCESS | A presses: 68, B presses: 24, Cost: 228
+SUCCESS | A presses: 54, B presses: 64, Cost: 226
+SUCCESS | A presses: 99, B presses: 86, Cost: 383
+FAILURE
+FAILURE
+SUCCESS | A presses: 28, B presses: 50, Cost: 134
+SUCCESS | A presses: 21, B presses: 69, Cost: 132
+SUCCESS | A presses: 7, B presses: 3, Cost: 24
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 10, B presses: 26, Cost: 56
+FAILURE
+SUCCESS | A presses: 42, B presses: 47, Cost: 173
+SUCCESS | A presses: 63, B presses: 8, Cost: 197
+SUCCESS | A presses: 58, B presses: 4, Cost: 178
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 98, B presses: 29, Cost: 323
+FAILURE
+FAILURE
+SUCCESS | A presses: 73, B presses: 98, Cost: 317
+FAILURE
+SUCCESS | A presses: 75, B presses: 50, Cost: 275
+SUCCESS | A presses: 38, B presses: 43, Cost: 157
+SUCCESS | A presses: 46, B presses: 35, Cost: 173
+FAILURE
+FAILURE
+SUCCESS | A presses: 56, B presses: 19, Cost: 187
+SUCCESS | A presses: 79, B presses: 47, Cost: 284
+SUCCESS | A presses: 10, B presses: 94, Cost: 124
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 60, B presses: 58, Cost: 238
+FAILURE
+SUCCESS | A presses: 10, B presses: 43, Cost: 73
+FAILURE
+FAILURE
+SUCCESS | A presses: 52, B presses: 77, Cost: 233
+SUCCESS | A presses: 57, B presses: 54, Cost: 225
+SUCCESS | A presses: 89, B presses: 73, Cost: 340
+SUCCESS | A presses: 94, B presses: 33, Cost: 315
+SUCCESS | A presses: 49, B presses: 44, Cost: 191
+SUCCESS | A presses: 58, B presses: 6, Cost: 180
+SUCCESS | A presses: 53, B presses: 76, Cost: 235
+FAILURE
+FAILURE
+SUCCESS | A presses: 39, B presses: 61, Cost: 178
+FAILURE
+FAILURE
+SUCCESS | A presses: 17, B presses: 82, Cost: 133
+FAILURE
+SUCCESS | A presses: 47, B presses: 25, Cost: 166
+SUCCESS | A presses: 32, B presses: 47, Cost: 143
+SUCCESS | A presses: 14, B presses: 4, Cost: 46
+SUCCESS | A presses: 9, B presses: 28, Cost: 55
+SUCCESS | A presses: 61, B presses: 92, Cost: 275
+SUCCESS | A presses: 88, B presses: 70, Cost: 334
+FAILURE
+FAILURE
+SUCCESS | A presses: 10, B presses: 81, Cost: 111
+FAILURE
+SUCCESS | A presses: 84, B presses: 39, Cost: 291
+SUCCESS | A presses: 88, B presses: 89, Cost: 353
+SUCCESS | A presses: 95, B presses: 19, Cost: 304
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 18, B presses: 95, Cost: 149
+FAILURE
+FAILURE
+SUCCESS | A presses: 27, B presses: 23, Cost: 104
+SUCCESS | A presses: 94, B presses: 56, Cost: 338
+SUCCESS | A presses: 20, B presses: 53, Cost: 113
+FAILURE
+SUCCESS | A presses: 23, B presses: 6, Cost: 75
+FAILURE
+SUCCESS | A presses: 42, B presses: 29, Cost: 155
+FAILURE
+FAILURE
+SUCCESS | A presses: 54, B presses: 23, Cost: 185
+FAILURE
+FAILURE
+SUCCESS | A presses: 50, B presses: 45, Cost: 195
+FAILURE
+FAILURE
+SUCCESS | A presses: 16, B presses: 59, Cost: 107
+FAILURE
+SUCCESS | A presses: 78, B presses: 58, Cost: 292
+FAILURE
+FAILURE
+SUCCESS | A presses: 76, B presses: 7, Cost: 235
+FAILURE
+FAILURE
+SUCCESS | A presses: 25, B presses: 39, Cost: 114
+SUCCESS | A presses: 38, B presses: 56, Cost: 170
+SUCCESS | A presses: 31, B presses: 20, Cost: 113
+FAILURE
+SUCCESS | A presses: 51, B presses: 27, Cost: 180
+FAILURE
+SUCCESS | A presses: 44, B presses: 16, Cost: 148
+SUCCESS | A presses: 80, B presses: 11, Cost: 251
+FAILURE
+SUCCESS | A presses: 40, B presses: 71, Cost: 191
+SUCCESS | A presses: 9, B presses: 45, Cost: 72
+FAILURE
+FAILURE
+SUCCESS | A presses: 7, B presses: 36, Cost: 57
+FAILURE
+SUCCESS | A presses: 24, B presses: 54, Cost: 126
+SUCCESS | A presses: 60, B presses: 57, Cost: 237
+SUCCESS | A presses: 3, B presses: 74, Cost: 83
+SUCCESS | A presses: 18, B presses: 38, Cost: 92
+SUCCESS | A presses: 31, B presses: 73, Cost: 166
+SUCCESS | A presses: 55, B presses: 26, Cost: 191
+FAILURE
+FAILURE
+SUCCESS | A presses: 19, B presses: 99, Cost: 156
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 54, B presses: 45, Cost: 207
+SUCCESS | A presses: 43, B presses: 75, Cost: 204
+SUCCESS | A presses: 44, B presses: 67, Cost: 199
+SUCCESS | A presses: 85, B presses: 20, Cost: 275
+SUCCESS | A presses: 35, B presses: 21, Cost: 126
+FAILURE
+FAILURE
+SUCCESS | A presses: 93, B presses: 98, Cost: 377
+SUCCESS | A presses: 92, B presses: 62, Cost: 338
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 89, B presses: 32, Cost: 299
+SUCCESS | A presses: 51, B presses: 41, Cost: 194
+SUCCESS | A presses: 6, B presses: 68, Cost: 86
+FAILURE
+SUCCESS | A presses: 9, B presses: 7, Cost: 34
+FAILURE
+SUCCESS | A presses: 66, B presses: 8, Cost: 206
+SUCCESS | A presses: 59, B presses: 31, Cost: 208
+FAILURE
+SUCCESS | A presses: 80, B presses: 46, Cost: 286
+SUCCESS | A presses: 9, B presses: 63, Cost: 90
+FAILURE
+FAILURE
+SUCCESS | A presses: 11, B presses: 64, Cost: 97
+FAILURE
+FAILURE
+SUCCESS | A presses: 60, B presses: 52, Cost: 232
+SUCCESS | A presses: 99, B presses: 83, Cost: 380
+SUCCESS | A presses: 29, B presses: 70, Cost: 157
+SUCCESS | A presses: 22, B presses: 48, Cost: 114
+FAILURE
+FAILURE
+SUCCESS | A presses: 29, B presses: 46, Cost: 133
+SUCCESS | A presses: 75, B presses: 26, Cost: 251
+SUCCESS | A presses: 47, B presses: 81, Cost: 222
+SUCCESS | A presses: 50, B presses: 61, Cost: 211
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 88, B presses: 62, Cost: 326
+SUCCESS | A presses: 78, B presses: 18, Cost: 252
+SUCCESS | A presses: 14, B presses: 9, Cost: 51
+SUCCESS | A presses: 48, B presses: 46, Cost: 190
+SUCCESS | A presses: 71, B presses: 37, Cost: 250
+SUCCESS | A presses: 44, B presses: 97, Cost: 229
+SUCCESS | A presses: 39, B presses: 13, Cost: 130
+FAILURE
+SUCCESS | A presses: 92, B presses: 80, Cost: 356
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 37, B presses: 73, Cost: 184
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 32, B presses: 53, Cost: 149
+FAILURE
+SUCCESS | A presses: 23, B presses: 88, Cost: 157
+FAILURE
+SUCCESS | A presses: 95, B presses: 27, Cost: 312
+FAILURE
+FAILURE
+SUCCESS | A presses: 7, B presses: 5, Cost: 26
+SUCCESS | A presses: 82, B presses: 53, Cost: 299
+SUCCESS | A presses: 31, B presses: 38, Cost: 131
+SUCCESS | A presses: 11, B presses: 43, Cost: 76
+FAILURE
+SUCCESS | A presses: 89, B presses: 76, Cost: 343
+SUCCESS | A presses: 22, B presses: 62, Cost: 128
+SUCCESS | A presses: 4, B presses: 50, Cost: 62
+SUCCESS | A presses: 97, B presses: 4, Cost: 295
+FAILURE
+SUCCESS | A presses: 23, B presses: 12, Cost: 81
+FAILURE
+SUCCESS | A presses: 72, B presses: 87, Cost: 303
+SUCCESS | A presses: 22, B presses: 13, Cost: 79
+FAILURE
+SUCCESS | A presses: 97, B presses: 61, Cost: 352
+SUCCESS | A presses: 78, B presses: 74, Cost: 308
+FAILURE
+SUCCESS | A presses: 45, B presses: 41, Cost: 176
+SUCCESS | A presses: 51, B presses: 14, Cost: 167
+SUCCESS | A presses: 90, B presses: 89, Cost: 359
+SUCCESS | A presses: 41, B presses: 65, Cost: 188
+SUCCESS | A presses: 64, B presses: 94, Cost: 286
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+SUCCESS | A presses: 78, B presses: 4, Cost: 238
+SUCCESS | A presses: 57, B presses: 66, Cost: 237
+SUCCESS | A presses: 66, B presses: 29, Cost: 227
+FAILURE
+FAILURE
+FAILURE
+FAILURE
+Minimum total cost: 34393

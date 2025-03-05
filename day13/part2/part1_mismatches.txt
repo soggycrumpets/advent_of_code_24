@@ -1,0 +1,33 @@
+91,92c91,92
+< FAILURE
+< FAILURE
+---
+> SUCCESS | A presses: 75, B presses: 19, Cost: 244
+> SUCCESS | A presses: 75, B presses: 62, Cost: 287
+137c137
+< FAILURE
+---
+> SUCCESS | A presses: 89, B presses: 73, Cost: 340
+139c139
+< FAILURE
+---
+> SUCCESS | A presses: 49, B presses: 44, Cost: 191
+170c170
+< FAILURE
+---
+> SUCCESS | A presses: 94, B presses: 56, Cost: 338
+238c238
+< FAILURE
+---
+> SUCCESS | A presses: 59, B presses: 31, Cost: 208
+267a268
+> SUCCESS | A presses: 92, B presses: 80, Cost: 356
+272,273c273
+< FAILURE
+< FAILURE
+---
+> SUCCESS | A presses: 37, B presses: 73, Cost: 184
+321c321
+< Minimum total cost: 32245
+---
+> Minimum total cost: 34393
