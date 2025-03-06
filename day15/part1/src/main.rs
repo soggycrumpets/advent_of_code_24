@@ -7,6 +7,7 @@ use std::path::Path;
 
 const _INPUT: &str = "input.txt";
 const _TEST_INPUT: &str = "test_input.txt";
+const _TEST_INPUT_2: &str = "test_input_2.txt";
 
 #[derive(PartialEq, Clone, Copy, Debug, Eq, Hash)]
 struct Vector2d {
@@ -26,15 +27,6 @@ impl Add for Vector2d {
             y: self.y + other.y,
         }
     }
-}
-
-#[derive(PartialEq, Clone, Copy)]
-enum Direction {
-    None,
-    Left,
-    Right,
-    Up,
-    Down,
 }
 
 fn load_warehouse_and_robot_instructions(name: &str) -> (Vec<Vec<char>>, String) {
@@ -64,7 +56,7 @@ fn load_warehouse_and_robot_instructions(name: &str) -> (Vec<Vec<char>>, String)
         }
     }
 
-    (warehouse, instructions.chars().rev().collect())
+    (warehouse, instructions)
 }
 
 fn get_robot(grid: &Vec<Vec<char>>) -> Vector2d {
@@ -82,7 +74,20 @@ fn get_robot(grid: &Vec<Vec<char>>) -> Vector2d {
     panic!("This grid doesn't have a robot!");
 }
 
-fn print_grid(grid: &Vec<Vec<char>>) {
+fn get_next_position(position: Vector2d, instruction: char) -> Vector2d {
+    let mut next_position = position;
+    match instruction {
+        '>' => next_position.x += 1,
+        'v' => next_position.y += 1,
+        '<' => next_position.x -= 1,
+        '^' => next_position.y -= 1,
+        _ => panic!("Attempted to read invalid instruction!"),
+    }
+
+    next_position
+}
+
+fn _print_grid(grid: &Vec<Vec<char>>) {
     for row in grid {
         for c in row {
             print!("{}", c);
@@ -92,6 +97,89 @@ fn print_grid(grid: &Vec<Vec<char>>) {
     println!();
 }
 
+fn swap_characters(position: Vector2d, next_position: Vector2d, warehouse: &mut Vec<Vec<char>>) {
+    let char1 = warehouse[position.y as usize][position.x as usize];
+    let char2 = warehouse[next_position.y as usize][next_position.x as usize];
+
+    warehouse[position.y as usize][position.x as usize] = char2;
+    warehouse[next_position.y as usize][next_position.x as usize] = char1;
+}
+
+fn try_move(position: Vector2d, direction: char, warehouse: &mut Vec<Vec<char>>) -> bool {
+    let next_position = get_next_position(position, direction);
+    let c = warehouse[next_position.y as usize][next_position.x as usize];
+    match c {
+        'O' => {
+            if try_move(next_position, direction, warehouse) {
+                swap_characters(position, next_position, warehouse);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        '.' => {
+            swap_characters(position, next_position, warehouse);
+            return true;
+        }
+        '#' => return false,
+        _ => panic!("Attempted to move into invalid character: {}", c),
+    }
+}
+
+fn move_robot(robot: &mut Vector2d, instruction: char, warehouse: &mut Vec<Vec<char>>) {
+    let next_position = get_next_position(*robot, instruction);
+    if try_move(*robot, instruction, warehouse) {
+        // swap_characters(*robot, next_position, warehouse);
+        *robot = next_position;
+    }
+}
+
+fn sum_GPS_coords(warehouse: &Vec<Vec<char>>) -> i32 {
+    let mut sum = 0;
+    for i in 0..warehouse.len() {
+        for j in 0..warehouse[i].len() {
+            if warehouse[i][j] == 'O' {
+                sum += 100 * i as i32 + j as i32;
+            }
+        }
+    }
+
+    sum
+}
+
 fn main() {
-    load_warehouse_and_robot_instructions(_TEST_INPUT);
+    let (mut warehouse, instructions) = load_warehouse_and_robot_instructions(_INPUT);
+    let mut robot = get_robot(&warehouse);
+    _print_grid(&warehouse);
+    for instruction in instructions.chars() {
+        // println!("{}", instruction);
+        move_robot(&mut robot, instruction, &mut warehouse);
+        // _print_grid(&warehouse);
+    }
+    _print_grid(&warehouse);
+    println!("GPS Sum: {}", sum_GPS_coords(&warehouse));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_get_robot() {
+        let (warehouse, _instructions) = load_warehouse_and_robot_instructions(_TEST_INPUT);
+        let robot = get_robot(&warehouse);
+        assert_eq!(robot.x, 4);
+        assert_eq!(robot.y, 4);
+    }
+
+    #[test]
+    fn test_website_example() {
+        let (mut warehouse, instructions) = load_warehouse_and_robot_instructions(_TEST_INPUT);
+        let mut robot = get_robot(&warehouse);
+        _print_grid(&warehouse);
+        for instruction in instructions.chars() {
+            move_robot(&mut robot, instruction, &mut warehouse);
+        }
+
+        assert_eq!(sum_GPS_coords(&warehouse), 10092);
+    }
 }
