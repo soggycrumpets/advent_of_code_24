@@ -5,7 +5,6 @@ use std::path::Path;
 
 const _INPUT: &str = "input.txt";
 const _TEST_INPUT: &str = "test_input.txt";
-const _TEST_INPUT_2: &str = "test_input_2.txt";
 
 #[derive(PartialEq, Clone, Copy, Debug, Eq, Hash)]
 struct Position {
