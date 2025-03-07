@@ -1,6 +1,9 @@
+use std::collections::HashMap;
 use std::fmt;
 use std::fs::File;
+use std::hash::Hash;
 use std::io::prelude::*;
+use std::io::{self, Write};
 use std::path::Path;
 
 const _INPUT: &str = "input.txt";
@@ -9,6 +12,8 @@ const _EXAMPLE_2: &str = "example2.txt";
 const _TEST_STRAIGHT_SHOT: &str = "test_straight_shot.txt";
 const _TEST_AROUND_CORNER: &str = "test_around_corner.txt";
 const _TEST_BASE_CASE: &str = "test_base_case.txt";
+
+static mut ITERATIONS: u64 = 0;
 
 #[derive(PartialEq, Clone, Copy, Debug, Eq, Hash)]
 struct Coordinate2d {
@@ -118,20 +123,29 @@ impl Reindeer {
     }
 }
 
+#[derive(PartialEq, Clone, Copy, Debug, Eq, Hash)]
+struct Decision {
+    position: Coordinate2d,
+    direction: char,
+}
+
 fn mark_map(map: &mut Vec<Vec<char>>, position: Coordinate2d, mark: char) {
     map[position.y as usize][position.x as usize] = mark;
 }
 
 fn path_is_clear(maze: &Vec<Vec<char>>, position: Coordinate2d) -> bool {
-    match maze[position.y as usize][position.x as usize] {
-        '#' | '<' | '>' | '^' | 'v' => false,
+    let c = maze[position.y as usize][position.x as usize];
+    match c {
+        '#' | '<' | '>' | '^' | 'v' => {
+            // print!("{}", c);
+            // io::stdout().flush().unwrap();
+            false
+        }
         _ => true,
     }
 }
 
 fn find_start_point(grid: &Vec<Vec<char>>) -> Coordinate2d {
-    // Find the guard's starting position (initialize to shut up the compiler)
-
     for i in 0..grid.len() {
         for j in 0..grid[0].len() {
             if grid[i][j] == 'S' {
@@ -145,15 +159,23 @@ fn find_start_point(grid: &Vec<Vec<char>>) -> Coordinate2d {
     panic!("Start point not found!");
 }
 
-fn _print_grid(grid: &Vec<Vec<char>>) {
-    let mut buf = String::new();
-    for i in grid {
-        for j in i {
-            buf.push(*j);
+fn _print_grid(grid: &Vec<Vec<char>>, reindeer_position: Coordinate2d) {
+    for i in 0..grid.len() {
+        for j in 0..grid[i].len() {
+            if reindeer_position
+                == (Coordinate2d {
+                    y: i as i32,
+                    x: j as i32,
+                })
+            {
+                let deer = emojis::get("🦌").unwrap();
+                print!("{}", deer);
+            } else {
+                print!("{}", grid[i][j]);
+            }
         }
-        buf.push('\n');
+        println!();
     }
-    print!("{}", buf);
 }
 
 fn read_file_to_array(name: &str) -> Vec<Vec<char>> {
@@ -177,25 +199,90 @@ fn found_exit(maze: &Vec<Vec<char>>, position: Coordinate2d) -> bool {
     }
 }
 
-fn spawn_sub_reindeer(reindeer: &Reindeer, maze: &Vec<Vec<char>>, spawn_direction: char) -> Reindeer {
+// If this is a record-low score to get to this decision, record it
+fn record_decision_cost(reindeer: &Reindeer, decision_costs: &mut HashMap<Decision, Option<i32>>) {
+    let decision = Decision {
+        position: reindeer.position,
+        direction: reindeer.direction,
+    };
+
+    // Do not update if this is not the lowest cost for this decision
+    if let Some(cost) = decision_costs.get(&decision) {
+        if let Some(value) = cost {
+            if *value > reindeer.score {
+                return;
+            }
+        }
+    } else {
+        decision_costs.insert(decision, Some(reindeer.score));
+    }
+}
+
+// Returns false if another reindeer has reached this decision with a lower score
+fn contemplate_decision(reindeer: &Reindeer, decision_costs: &mut HashMap<Decision, Option<i32>>) -> bool {
+    let decision = Decision {
+        position: reindeer.position,
+        direction: reindeer.direction,
+    };
+
+    if let Some(cost) = decision_costs.get(&decision) {
+        if let Some(value) = cost {
+            if *value > reindeer.score {
+                return false
+            } else {
+                return true
+            }
+        } else {
+            return true
+        }
+    } else {
+        return true
+    }
+}
+
+fn spawn_sub_reindeer(
+    reindeer: &Reindeer,
+    maze: &Vec<Vec<char>>,
+    spawn_direction: char,
+    decision_costs: &mut HashMap<Decision, Option<i32>>,
+) -> Reindeer {
     let mut new_reindeer = reindeer.clone();
     new_reindeer.turn(spawn_direction);
+
+    // Abord if score is exceeding the minimum score
+    if let Some(min_score) = new_reindeer.min_score {
+        if new_reindeer.score > min_score {
+            // println!("good job!");
+            return new_reindeer;
+        }
+    }
 
     let mut new_maze = maze.clone();
     mark_map(&mut new_maze, new_reindeer.position, new_reindeer.direction);
 
     new_reindeer.move_straight();
-    pathfind(&mut new_reindeer, &mut new_maze);
+    pathfind(&mut new_reindeer, &mut new_maze, decision_costs);
 
     new_reindeer
 }
 
-fn pathfind(reindeer: &mut Reindeer, maze: &mut Vec<Vec<char>>) {
+fn pathfind(
+    reindeer: &mut Reindeer,
+    maze: &mut Vec<Vec<char>>,
+    decision_costs: &mut HashMap<Decision, Option<i32>>,
+) {
+    unsafe {
+        if ITERATIONS % 100000 == 0 {
+            // _print_grid(maze, reindeer.position);
+        }
+        ITERATIONS += 1;
+    }
+
     // If the exit is found, this score is a potential minimum score. Merge it with the current minimum score
     if found_exit(maze, reindeer.position) {
         reindeer.merge_min_score(Some(reindeer.score));
         println!("Score: {}", reindeer.score);
-        _print_grid(maze);
+        _print_grid(maze, reindeer.position);
         return;
     }
 
@@ -204,22 +291,22 @@ fn pathfind(reindeer: &mut Reindeer, maze: &mut Vec<Vec<char>>) {
 
     // Spawn a new reindeer to explore left. Merge this reindeer's min score with the current one.
     if path_is_clear(maze, reindeer.position.ahead(reindeer.left())) {
-        let new_reindeer = spawn_sub_reindeer(&reindeer, &maze, reindeer.left());
+        let new_reindeer = spawn_sub_reindeer(&reindeer, &maze, reindeer.left(), decision_costs);
         reindeer.merge_min_score(new_reindeer.min_score);
     }
     // Spawn a new reindeer to explore right. Merge this reindeer's min score with the current one.
     if path_is_clear(maze, reindeer.position.ahead(reindeer.right())) {
-        let new_reindeer = spawn_sub_reindeer(&reindeer, &maze, reindeer.right());
+        let new_reindeer = spawn_sub_reindeer(&reindeer, &maze, reindeer.right(), decision_costs);
         reindeer.merge_min_score(new_reindeer.min_score);
     }
     // Move reindeer ahead.
     if path_is_clear(maze, reindeer.position.ahead(reindeer.direction)) {
         reindeer.move_straight();
-        pathfind(reindeer, maze);
+        pathfind(reindeer, maze, decision_costs);
     }
-    // else {
-    // _print_grid(maze);
-    // }
+
+    // Record the minimum score accrued from this decision.
+    record_decision_cost(reindeer, decision_costs);
 
     // The reindeer has no more moves to make
     return;
@@ -227,10 +314,11 @@ fn pathfind(reindeer: &mut Reindeer, maze: &mut Vec<Vec<char>>) {
 
 fn main() {
     let mut maze = read_file_to_array(_INPUT);
-    _print_grid(&maze);
+    // _print_grid(&maze, );
     let mut reindeer = Reindeer::new(&maze);
 
-    pathfind(&mut reindeer, &mut maze);
+    let mut decision_costs: HashMap<Decision, Option<i32>> = HashMap::new();
+    pathfind(&mut reindeer, &mut maze, &mut decision_costs);
     if let Some(min_score) = reindeer.min_score {
         println!("Min score: {}", min_score);
     } else {
@@ -293,7 +381,7 @@ mod tests {
     #[test]
     fn test_obstacle_checking() {
         let maze = read_file_to_array(_EXAMPLE_1);
-        _print_grid(&maze);
+        // _print_grid(&maze);
         let reindeer = Reindeer::new(&maze);
 
         assert_eq!(
@@ -317,7 +405,9 @@ mod tests {
     fn test_straight_shot() {
         let mut maze = read_file_to_array(_TEST_STRAIGHT_SHOT);
         let mut reindeer = Reindeer::new(&maze);
-        pathfind(&mut reindeer, &mut maze);
+        let mut min_scores: HashMap<Decision, Option<i32>> = HashMap::new();
+
+        pathfind(&mut reindeer, &mut maze, &mut min_scores);
         assert_eq!(reindeer.min_score, Some(1012));
     }
 
@@ -325,7 +415,8 @@ mod tests {
     fn test_around_corner() {
         let mut maze = read_file_to_array(_TEST_AROUND_CORNER);
         let mut reindeer = Reindeer::new(&maze);
-        pathfind(&mut reindeer, &mut maze);
+        let mut min_scores: HashMap<Decision, Option<i32>> = HashMap::new();
+        pathfind(&mut reindeer, &mut maze, &mut min_scores);
         assert_eq!(reindeer.min_score, Some(2018));
     }
 
@@ -334,13 +425,15 @@ mod tests {
         {
             let mut maze = read_file_to_array(_EXAMPLE_1);
             let mut reindeer = Reindeer::new(&maze);
-            pathfind(&mut reindeer, &mut maze);
+            let mut min_scores: HashMap<Decision, Option<i32>> = HashMap::new();
+            pathfind(&mut reindeer, &mut maze, &mut min_scores);
             assert_eq!(reindeer.min_score, Some(7036), "Failed example 1!");
         }
         {
             let mut maze = read_file_to_array(_EXAMPLE_2);
             let mut reindeer = Reindeer::new(&maze);
-            pathfind(&mut reindeer, &mut maze);
+            let mut min_scores: HashMap<Decision, Option<i32>> = HashMap::new();
+            pathfind(&mut reindeer, &mut maze, &mut min_scores);
             assert_eq!(reindeer.min_score, Some(11048), "Failed example 2!");
         }
     }
