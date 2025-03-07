@@ -241,11 +241,8 @@ fn spawn_sub_reindeer(
     let mut new_reindeer = reindeer.clone();
 
     new_reindeer.turn(spawn_direction);
-    // if !contemplate_decision(reindeer, min_scores) {
-        // return new_reindeer;
-    // }
 
-    // Abord if score is exceeding the minimum score
+    // Abort if score is exceeding the minimum score
     if let Some(min_score) = new_reindeer.min_score {
         if new_reindeer.score > min_score {
             // println!("good job!");
@@ -257,9 +254,6 @@ fn spawn_sub_reindeer(
     mark_map(&mut new_maze, new_reindeer.position, new_reindeer.direction);
 
     new_reindeer.move_straight();
-    // if !contemplate_decision(&new_reindeer, min_scores) {
-        // return new_reindeer;
-    // }
 
     pathfind(&mut new_reindeer, &mut new_maze, min_scores);
 

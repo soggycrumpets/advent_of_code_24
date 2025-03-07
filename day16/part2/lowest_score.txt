@@ -1,0 +1,4 @@
+221748
+111520 is too high
+101496 is too high
+Checking right before left, I got 103488
