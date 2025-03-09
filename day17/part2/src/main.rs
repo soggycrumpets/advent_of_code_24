@@ -2,6 +2,8 @@ use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Display, Path};
+use std::thread::sleep;
+use std::time::{Duration, Instant};
 
 const _INPUT: &str = "input.txt";
 const _EXAMPLE1: &str = "part1_example.txt";
@@ -136,57 +138,49 @@ impl<'a> CPU<'a> {
 }
 
 struct Controller<'a> {
-    state: State,
-    digits_matched: usize,
     target: &'a Vec<i128>,
     guess: i128,
-    gain: i128,
-    consecutive_increases: i128,
+    matches: i32,
 }
 impl<'a> Controller<'a> {
     fn new(target: &Vec<i128>) -> Controller {
         Controller {
-            state: State::Increasing,
-            digits_matched: 0,
             target: target,
             guess: 0,
-            gain: 1,
-            consecutive_increases: 0,
+            matches: 0,
         }
     }
 
     fn get_next_guess(&mut self, output: &Vec<i128>) {
-        // match self.state {
-        // State::Increasing => {
-        // if self.all_digits_match(output) {
-        // self.guess *= 8;
-        // self.digits_matched += 1;
-        //             self.state = State::Decreasing;
-        //         } else {
-        //             self.guess += 1;
-        //         }
-        //     }
-        //     State::Decreasing => {
-        //         if !self.all_but_first_two_digits_match(output) || self.digits_matched < 2{
-        //             self.state = State::Increasing;
-        //         } else {
-        //             self.guess -= 1;
-        //         }
-        //     }
-        // }
 
-        if self.count_matching_digits(output) < 3 {
-            self.guess += 1;
-        } else {
-            self.guess += 8_i128.pow((4) as u32);
+        self.matches = self.matches.max(self.count_matching_digits(output));
+
+        if self.matches < 1 {
+            self.guess += 8_i128.pow(0);
+        } 
+        else if self.matches < 2 {
+            self.guess += 8_i128.pow(1);
+            self.matches = 1;
+        } 
+        else if self.matches < 3 {
+            self.guess += 8_i128.pow(2);
         }
+        else if self.matches < 4 {
+            self.guess += 8_i128.pow(3);
+        }
+        else if self.matches < 5 {
+            self.guess += 8_i128.pow(4);
+        }
+        else if self.matches < 6 {
+            self.guess += 8_i128.pow(5);
+        }
+        else if self.matches < 7 {
+            self.guess += 8_i128.pow(6);
+        }
+    //     else if self.count_matching_digits(output) < 9 {
+    //         self.guess += 8_i128.pow(7);
+    //     }
 
-        // if self.all_digits_match(output) {
-        // self.guess *= 8;
-        // self.state = State::Decreasing;
-        // } else {
-        // self.guess += 1;
-        // }
     }
 
     fn count_matching_digits(&mut self, output: &Vec<i128>) -> i32 {
@@ -200,34 +194,6 @@ impl<'a> Controller<'a> {
             }
         } 
         matches
-    }
-
-    fn compare_digit(&mut self, output: &Vec<i128>) -> bool {
-        // If the first digit matches the last digit that we have yet to match
-        if output.len() < 0 {
-            return false;
-        }
-
-        if output[output.len() - 1] == self.target[output.len() - 1] {
-            self.digits_matched += 1;
-            return true;
-        } else {
-            return false;
-        }
-
-        // if output[self.digits_matched] == self.target[self.target.len() - 1 - self.digits_matched] {
-        // self.digits_matched += 1;
-        // return true;
-        // } else {
-        // return false;
-        // }
-
-        // if output[0] == self.target[self.target.len() - 1 - self.digits_matched] {
-        //     self.digits_matched += 1;
-        //     return true;
-        // } else {
-        //     return false;
-        // }
     }
 
     fn all_but_first_two_digits_match(&mut self, output: &Vec<i128>) -> bool {
@@ -321,19 +287,26 @@ fn main() {
     let rcx = cpu.rcx;
     let mut rax: i128 = cpu.rax;
 
+    let interval = Duration::from_secs(1)/30;
+    let mut next_time = Instant::now() + interval;
+
     loop {
-        controller.get_next_guess(cpu.output);
         rax = controller.guess;
 
         cpu.init(rax, rbx, rcx);
         cpu.run(&program);
         _print_output(&cpu.output);
         // print!(" | {}", );
-        // print!(" | {}", controller.all_digits_match(cpu.output));
+        print!(" | {}", controller.matches);
         println!(" | {}", controller.guess);
+
         if *cpu.output == program {
             break;
         }
+        controller.get_next_guess(cpu.output);
+
+        sleep(next_time - Instant::now());
+        next_time += interval;
     }
     println!("Program copies itself for rax = {}", rax);
 }

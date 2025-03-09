@@ -1,7 +1,7 @@
+use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Display, Path};
-use std::fmt;
 
 const _INPUT: &str = "input.txt";
 const _EXAMPLE1: &str = "part1_example.txt";
@@ -136,26 +136,31 @@ impl<'a> CPU<'a> {
 }
 
 struct Controller<'a> {
+    state: State,
     digits_matched: usize,
     target: &'a Vec<i128>,
     guess: i128,
+    gain: i128,
+    consecutive_increases: i128,
 }
 impl<'a> Controller<'a> {
     fn new(target: &Vec<i128>) -> Controller {
         Controller {
+            state: State::Increasing,
             digits_matched: 0,
             target: target,
             guess: 0,
+            gain: 1,
+            consecutive_increases: 0,
         }
     }
 
     fn get_next_guess(&mut self, output: &Vec<i128>) {
-
         // match self.state {
-            // State::Increasing => {
-                // if self.all_digits_match(output) {
-                    // self.guess *= 8;
-                    // self.digits_matched += 1;
+        // State::Increasing => {
+        // if self.all_digits_match(output) {
+        // self.guess *= 8;
+        // self.digits_matched += 1;
         //             self.state = State::Decreasing;
         //         } else {
         //             self.guess += 1;
@@ -169,35 +174,54 @@ impl<'a> Controller<'a> {
         //         }
         //     }
         // }
-        
-        // self.guess *= 8_i128.pow(self.consecutive_increases as u32) ;
-        // self.consecutive_increases += 1;
-        // self.compare_digit(output);
-        self.guess += 64;
-        // self.guess += 8_i128.pow((self.digits_matched+1) as u32);
 
-        
+        if self.count_matching_digits(output) < 3 {
+            self.guess += 1;
+        } else {
+            self.guess += 8_i128.pow((4) as u32);
+        }
+
         // if self.all_digits_match(output) {
-            // self.guess *= 8;
-            // self.state = State::Decreasing;
+        // self.guess *= 8;
+        // self.state = State::Decreasing;
         // } else {
-            // self.guess += 1;
+        // self.guess += 1;
         // }
     }
 
-    fn compare_digit(&mut self, output: &Vec<i128>) {
-        if output.len() == 0 {
-            return 
+    fn count_matching_digits(&mut self, output: &Vec<i128>) -> i32 {
+        let mut matches = 0;
+        for i in 0..output.len() {
+            if output[i] == self.target[i] {
+                matches += 1;
+            } 
+            else {
+                break
+            }
         } 
+        matches
+    }
+
+    fn compare_digit(&mut self, output: &Vec<i128>) -> bool {
         // If the first digit matches the last digit that we have yet to match
-        
-        if output[self.digits_matched] == self.target[self.digits_matched] {
+        if output.len() < 0 {
+            return false;
+        }
+
+        if output[output.len() - 1] == self.target[output.len() - 1] {
             self.digits_matched += 1;
-            return 
-        } 
-        
-        
-        
+            return true;
+        } else {
+            return false;
+        }
+
+        // if output[self.digits_matched] == self.target[self.target.len() - 1 - self.digits_matched] {
+        // self.digits_matched += 1;
+        // return true;
+        // } else {
+        // return false;
+        // }
+
         // if output[0] == self.target[self.target.len() - 1 - self.digits_matched] {
         //     self.digits_matched += 1;
         //     return true;
@@ -213,16 +237,29 @@ impl<'a> Controller<'a> {
             }
         }
         return true;
-    }    
+    }
 
     fn all_digits_match(&mut self, output: &Vec<i128>) -> bool {
-
         for i in 0..output.len() {
             if output[output.len() - 1 - i] != self.target[self.target.len() - 1 - i] {
                 return false;
             }
         }
         return true;
+    }
+}
+
+#[derive(PartialEq)]
+enum State {
+    Increasing,
+    Decreasing,
+}
+impl fmt::Display for State {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            State::Increasing => write!(f, "Increasing"),
+            State::Decreasing => write!(f, "Decreasing"),
+        }
     }
 }
 
@@ -287,14 +324,13 @@ fn main() {
     loop {
         controller.get_next_guess(cpu.output);
         rax = controller.guess;
-        // println!("rax: {}", rax);
 
         cpu.init(rax, rbx, rcx);
         cpu.run(&program);
         _print_output(&cpu.output);
-        println!();
-        // println!(" | {}", controller.guess);
+        // print!(" | {}", );
         // print!(" | {}", controller.all_digits_match(cpu.output));
+        println!(" | {}", controller.guess);
         if *cpu.output == program {
             break;
         }
