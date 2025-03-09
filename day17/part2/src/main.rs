@@ -143,7 +143,7 @@ struct Controller<'a> {
     guess: i128,
     matches: i32,
     current_digit: usize,
-    digit_states: Vec<i32>,
+    digit_states: Vec<i128>,
 }
 impl<'a> Controller<'a> {
     fn new(target: &Vec<i128>) -> Controller {
@@ -223,23 +223,17 @@ impl<'a> Controller<'a> {
     }
 
     fn current_digit_is_maxed(&mut self) -> bool {
-        if self.guess % 8_i128.pow(1 + self.current_digit as u32)
-            == 7 * 8_i128.pow(self.current_digit as u32)
-        {
-            return true;
-        } else {
-            return false;
-        }
+        self.digit_states[self.current_digit] == 8
     }
 
     fn reset_current_digit(&mut self) {
-        // Digit states are 0-7
-        let digit_state = self.guess % 8_i128.pow(1 + self.current_digit as u32);
-        self.guess -= 7 * 8_i128.pow(self.current_digit as u32);
+        self.guess -= self.digit_states[self.current_digit] * 8_i128.pow(self.current_digit as u32);
+        self.digit_states[self.current_digit] = 0;
     }
 
     fn increment_digit(&mut self) {
         self.guess += 8_i128.pow(self.current_digit as u32);
+        self.digit_states[self.current_digit] += 1;
     }
 
     // fn count_matching_digits_from_front(&mut self, output: &Vec<i128>) -> i32 {
