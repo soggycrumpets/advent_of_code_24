@@ -22,7 +22,19 @@ jnz 0: -> goto start
 
 Adding 8^pow(digit) does not affect digits before it!
 Actually, adding 8^pow(digit) does not affect digits digits that are more than 2 digits to the left...
-So, maybe solve three digits at a time. Match the first three, 
+So, maybe solve three digits at a time.
+
+You may still be able to solve this way starting from the back digits... adding 8^pow(15) may increment the last digit by 1 interval,
+then continue from there...
+One very interesting observation is that digits can ONLY be incremented by increasing the register value in increments
+8*pow(n-1), where n is the place of the digit.
+
+It seems that while doing this method, you will eventually run into digits that are impossible to get to the right value.
+A potential solution to this is to walk back the other way through the digits, incrementing them until either:
+    - They roll over to the same value again - this way, the digit in this place will still be valid, but the digits before it will be different
+        and may have a chance of lining up now.
+    - They are incremented enough that they start affecting the digit in front of them. In this case, we would want to continue
+        walking back through the digits and trying the ones before until we find one that works.
 
 MULTIPLYING THE VALUE OF REGISTER 8 BY 8 SHIFTS OUTPUT DIGITS 1 TO THE RIGHT
 DIVIDING THE VALUE OF REGISTER 8 BY 8 SHIFTS THE OUTPUT DIGITS 1 TO THE LEFT

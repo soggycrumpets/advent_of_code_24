@@ -139,92 +139,161 @@ impl<'a> CPU<'a> {
 
 struct Controller<'a> {
     target: &'a Vec<i128>,
+    state: State,
     guess: i128,
     matches: i32,
+    current_digit: usize,
+    digit_states: Vec<i32>,
 }
 impl<'a> Controller<'a> {
     fn new(target: &Vec<i128>) -> Controller {
         Controller {
             target: target,
-            guess: 0,
+            state: State::Forward,
+            guess: 8_i128.pow(target.len() as u32 - 1),
             matches: 0,
+            current_digit: target.len() - 1,
+            digit_states: vec![0; target.len()],
         }
     }
 
     fn get_next_guess(&mut self, output: &Vec<i128>) {
 
-        self.matches = self.matches.max(self.count_matching_digits(output));
+        if self.current_digit_is_maxed() {
+            while self.current_digit_is_maxed() {
+                self.reset_current_digit();
+                self.current_digit += 1;
+            }
+            self.increment_digit();
+        } else if self.current_digit_matches(output) {
+            self.current_digit -= 1;
+        } else {
+            self.increment_digit();
+        }
 
-        if self.matches < 1 {
-            self.guess += 8_i128.pow(0);
-        } 
-        else if self.matches < 2 {
-            self.guess += 8_i128.pow(1);
-            self.matches = 1;
-        } 
-        else if self.matches < 3 {
-            self.guess += 8_i128.pow(2);
+        // match self.state {
+        //     State::Forward => {
+        //         if self.current_digit_is_maxed() {
+        //             while self.current_digit_is_maxed() {
+        //                 self.reset_current_digit();
+        //                 self.current_digit += 1;
+        //             }
+        //             self.increment_digit();
+        //             self.state = State::Backward;
+        //         } else if self.current_digit_matches(output) {
+        //             self.current_digit -= 1;
+        //         } else {
+        //             self.increment_digit();
+        //         }
+        //     }
+        //     State::Backward => {
+        //         if self.current_digit_is_maxed() {
+        //             self.reset_current_digit();
+        //             self.current_digit += 1;
+        //         } else if self.current_digit_matches(output) {
+        //             self.current_digit -= 1;
+        //             self.state = State::Forward;
+        //         }
+        //         else {
+        //             self.increment_digit();
+        //         }
+        //     }
+        // }
+
+        // current digit = last digit
+        // while current digit does not match, increment current digit.
+        // current digit = next digit
+        // ...
+        // if current digit is incremented > 7 times
+        // zero current digit
+        // current digit = previous digit
+        // increment current digit and while current digit does not match, increment current digit
+        // if current digit is incremented > 7 times
+        // zero current digit
+        // current digit = previus digit
+        // ...
+        // if current digit matches
+        // current digit = next digit
+        // while current does not match, increment current digit
+        // ...
+    }
+
+    fn current_digit_matches(&mut self, output: &Vec<i128>) -> bool {
+        output[self.current_digit] == self.target[self.current_digit]
+    }
+
+    fn current_digit_is_maxed(&mut self) -> bool {
+        if self.guess % 8_i128.pow(1 + self.current_digit as u32)
+            == 7 * 8_i128.pow(self.current_digit as u32)
+        {
+            return true;
+        } else {
+            return false;
         }
-        else if self.matches < 4 {
-            self.guess += 8_i128.pow(3);
-        }
-        else if self.matches < 5 {
-            self.guess += 8_i128.pow(4);
-        }
-        else if self.matches < 6 {
-            self.guess += 8_i128.pow(5);
-        }
-        else if self.matches < 7 {
-            self.guess += 8_i128.pow(6);
-        }
-    //     else if self.count_matching_digits(output) < 9 {
-    //         self.guess += 8_i128.pow(7);
+    }
+
+    fn reset_current_digit(&mut self) {
+        // Digit states are 0-7
+        let digit_state = self.guess % 8_i128.pow(1 + self.current_digit as u32);
+        self.guess -= 7 * 8_i128.pow(self.current_digit as u32);
+    }
+
+    fn increment_digit(&mut self) {
+        self.guess += 8_i128.pow(self.current_digit as u32);
+    }
+
+    // fn count_matching_digits_from_front(&mut self, output: &Vec<i128>) -> i32 {
+    //     let mut matches = 0;
+    //     for i in 0..output.len() {
+    //         if output[i] == self.target[i] {
+    //             matches += 1;
+    //         } else {
+    //             break;
+    //         }
     //     }
+    //     matches
+    // }
 
-    }
+    // fn count_matching_digits_from_back(&mut self, output: &Vec<i128>) -> i32 {
+    //     let mut matches = 0;
+    //     for i in (0..output.len()).rev() {
+    //         if output[i] == self.target[i] {
+    //             matches += 1;
+    //         } else {
+    //             break;
+    //         }
+    //     }
+    //     matches
+    // }
 
-    fn count_matching_digits(&mut self, output: &Vec<i128>) -> i32 {
-        let mut matches = 0;
-        for i in 0..output.len() {
-            if output[i] == self.target[i] {
-                matches += 1;
-            } 
-            else {
-                break
-            }
-        } 
-        matches
-    }
+    // fn all_but_first_two_digits_match(&mut self, output: &Vec<i128>) -> bool {
+    //     for i in 0..output.len() - 2 {
+    //         if output[output.len() - 1 - i] != self.target[self.target.len() - 1 - i] {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
 
-    fn all_but_first_two_digits_match(&mut self, output: &Vec<i128>) -> bool {
-        for i in 0..output.len() - 2 {
-            if output[output.len() - 1 - i] != self.target[self.target.len() - 1 - i] {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    fn all_digits_match(&mut self, output: &Vec<i128>) -> bool {
-        for i in 0..output.len() {
-            if output[output.len() - 1 - i] != self.target[self.target.len() - 1 - i] {
-                return false;
-            }
-        }
-        return true;
-    }
+    // fn all_digits_match(&mut self, output: &Vec<i128>) -> bool {
+    //     for i in 0..output.len() {
+    //         if output[output.len() - 1 - i] != self.target[self.target.len() - 1 - i] {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
 }
-
 #[derive(PartialEq)]
 enum State {
-    Increasing,
-    Decreasing,
+    Forward,
+    Backward,
 }
 impl fmt::Display for State {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            State::Increasing => write!(f, "Increasing"),
-            State::Decreasing => write!(f, "Decreasing"),
+            State::Forward => write!(f, "Forward"),
+            State::Backward => write!(f, "Backward"),
         }
     }
 }
@@ -280,6 +349,7 @@ fn main() {
     let mut cpu = CPU::new(&mut output);
     let program = load_program(_INPUT, &mut cpu);
     let mut controller: Controller = Controller::new(&program);
+    controller.current_digit = program.len() - 1;
 
     cpu.run(&program);
 
@@ -287,7 +357,7 @@ fn main() {
     let rcx = cpu.rcx;
     let mut rax: i128 = cpu.rax;
 
-    let interval = Duration::from_secs(1)/30;
+    let interval = Duration::from_secs(1) / 30;
     let mut next_time = Instant::now() + interval;
 
     loop {
@@ -296,8 +366,10 @@ fn main() {
         cpu.init(rax, rbx, rcx);
         cpu.run(&program);
         _print_output(&cpu.output);
-        // print!(" | {}", );
         print!(" | {}", controller.matches);
+        print!(" | {}", controller.current_digit);
+        print!(" | {}", controller.state);
+        print!(" | {}", controller.current_digit_is_maxed());
         println!(" | {}", controller.guess);
 
         if *cpu.output == program {
