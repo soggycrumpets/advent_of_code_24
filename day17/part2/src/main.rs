@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::prelude::*;
-use std::path::{Path};
+use std::path::Path;
 // use std::thread::sleep;
 // use std::time::{Duration, Instant};
 

@@ -154,11 +154,8 @@ fn record_min_score(reindeer: &mut Reindeer, min_scores: &mut HashMap<Decision, 
         position: reindeer.position,
     };
 
-    // Update the min score for this tile
-    if let Some(min_score) = reindeer.min_score {
-        let points_to_finish = min_score - reindeer.score;
-        min_scores.insert(decision, points_to_finish);
-    }
+    // Update the minimum steps required to reach this tile
+        min_scores.insert(decision, reindeer.score);
 }
 
 // Returns false if another reindeer has reached this decision with a lower score
@@ -167,19 +164,10 @@ fn contemplate_decision(reindeer: &Reindeer, min_scores: &mut HashMap<Decision, 
         position: reindeer.position,
     };
 
-if let Some(points_to_finish) = min_scores.get(&decision) {
-        let new_min_score = points_to_finish + reindeer.score;
-        if let Some(min_score) = reindeer.min_score {
-            return new_min_score < min_score;
-        }
+    if let Some(min_steps_to_reach) = min_scores.get(&decision) {
+        return reindeer.score < *min_steps_to_reach;
     }
 
-    // if let Some(points_to_finish) = min_scores.get(&decision) {
-    //     let new_min_score = points_to_finish + reindeer.score;
-    //     if let Some(min_score) = reindeer.min_score {
-    //         return new_min_score < min_score;
-    //     }
-    // }
     return true;
 }
 
@@ -195,11 +183,11 @@ fn spawn_sub_reindeer(
     // Abort if score is exceeding the minimum score
     if let Some(min_score) = new_reindeer.min_score {
         if new_reindeer.score > min_score {
-            return new_reindeer
+            return new_reindeer;
         }
     }
     if !contemplate_decision(reindeer, min_scores) {
-        return new_reindeer
+        return new_reindeer;
     }
 
     let mut new_maze = maze.clone();
@@ -227,7 +215,7 @@ fn pathfind(
     }
     if let Some(min_score) = reindeer.min_score {
         if reindeer.score > min_score {
-            return
+            return;
         }
     }
 
@@ -269,11 +257,7 @@ fn pathfind(
 }
 
 fn main() {
-    let mut maze = read_file_to_array(
-        _INPUT,
-        _INPUT_GRIDSIZE,
-        _INPUT_BYTES_TO_SIMULATE,
-    );
+    let mut maze = read_file_to_array(_INPUT, _INPUT_GRIDSIZE, _INPUT_BYTES_TO_SIMULATE);
     _print_grid(&maze);
 
     let mut person = Reindeer::new();
