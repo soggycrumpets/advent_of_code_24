@@ -8,8 +8,6 @@ use std::path::Path;
 const _INPUT: &str = "input.txt";
 const _EXAMPLE: &str = "example.txt";
 
-// I've determined that no two towels are exactly the same,
-// so I've chosen to store the towels in a hashset over a hashmap for sake of simplicity.
 fn load_towels_and_designs(name: &str) -> (HashSet<String>, usize, Vec<String>) {
     let path = Path::new(name);
     let mut file = File::open(&path).unwrap();
