@@ -13,6 +13,13 @@ const _EXAMPLE_1: &str = "example1.txt";
 const _EXAMPLE_1_GRIDSIZE: usize = 7;
 const _EXAMPLE_1_BYTES_TO_SIMULATE: usize = 12;
 
+// This is a slightly modified version of my code from day 16: reindeer race. The main change is that the "reindeer" can
+// now move in any direction. In the reindeer race, I kept a hash table that tied minimum scores to decisions (a space and direction).
+// In this problem, a decision is represented by a just a space (We can move any direction from any orientation).
+// The hash table wasn't helping cut down the egregiously long search time, since the algorithm couldn't even find the exit a single time.
+// Luckily, the solution was fairly simple. The hash table how keeps track of the minimum number of steps required to reach a space.
+// If we reach a space using more steps than we had in the past, we back out of this decision tree because we know it's suboptimal.
+
 #[derive(PartialEq, Clone, Copy, Debug, Eq, Hash)]
 struct Coordinate2d {
     x: i32,
