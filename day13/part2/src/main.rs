@@ -92,7 +92,8 @@ fn load_claw_machines_from_file(name: &str, part2: bool) -> Vec<ClawMachine> {
 
 // Here's the general idea behind this function:
 // One of the buttons is the "x-shifter" and the other is the "y-shifter"
-// The x-shifter button is pressed/unpressed until the current x-position matches (or gets as close as it can get to) the prize's x-position
+// The x-shifter button is pressed/unpressed (yes, you can't actually un-press the buttons, but pretend you can) until the 
+//      current x-position is as close as it can get to the prize's x-position
 // Then, the y-shifter button is pressed/unpressed until the current y-position matches the prize's y-position
 // This repeats for a while. If the current position converges to a single (x, y) coordinate, a solution has been found.
 // The function returns the number of times each button was pressed to reach this point.
@@ -200,6 +201,8 @@ fn compute_minimum_cost_sum(claw_machines: Vec<ClawMachine>) -> i64 {
 }
 
 fn main() {
+let Timer
+
     let claw_machines = load_claw_machines_from_file(_INPUT, true);
     let minimum_total_cost = compute_minimum_cost_sum(claw_machines);
     println!("Minimum total cost: {}", minimum_total_cost);
