@@ -74,46 +74,51 @@ fn numerical_keypad(button: char) -> Position {
         '7' => Position { x: 0, y: 0 },
         '8' => Position { x: 1, y: 0 },
         '9' => Position { x: 2, y: 0 },
+        'X' => Position { x: 0, y: 3 },
         _ => panic!("Invalid button!"),
     }
 }
 
-fn navigate_numerical_keypad(button: char, position: Position) -> (String, Position) {
+#[derive(Clone, Copy)]
+enum KeypadType {
+    Numerical,
+    Directional,
+}
+
+fn navigate_keypad(button: char, position: Position, keypad_type: KeypadType) -> (String, Position) {
     let mut current_position = position;
-    let button_position = numerical_keypad(button);
     let mut button_presses = String::new();
 
-    // The buttons prioritized in a specific order as to prevent
-    // going over the empty space
-    while current_position != button_position {
-        if current_position.x < button_position.x {
-            current_position.x += 1;
-            button_presses.push('>')
-        } else if current_position.y > button_position.y {
-            current_position.y -= 1;
-            button_presses.push('^')
-        } else if current_position.x > button_position.x {
-            current_position.x -= 1;
-            button_presses.push('<')
-        } else {
-            current_position.y += 1;
-            button_presses.push('v');
+    let button_position: Position;
+    let empty_space: Position;
+    match keypad_type {
+        KeypadType::Numerical => {
+            button_position = numerical_keypad(button);
+            empty_space = numerical_keypad('X');
         }
+        KeypadType::Directional => {
+            button_position = directional_keypad(button);
+            empty_space = directional_keypad('X');
+        }
+    }
+    // If we moved in a certain direction to get to the previous button, we should prioritize moving in that direction first.
+
+    
+
+    if empty_space.x != current_position.x {
+        match_vertical_position(&mut current_position, button_position, &mut button_presses);
+        assert_ne!(current_position, empty_space);
+        match_horizontal_position(&mut current_position, button_position, &mut button_presses);
+        assert_ne!(current_position, empty_space);
+    } else {
+        match_horizontal_position(&mut current_position, button_position, &mut button_presses);
+        assert_ne!(current_position, empty_space);
+        match_vertical_position(&mut current_position, button_position, &mut button_presses);
+        assert_ne!(current_position, empty_space);
     }
     button_presses.push('A');
 
     (button_presses, current_position)
-}
-
-fn get_sequence_from_numerical_keypad(input_sequence: &str) -> String {
-    let mut position = numerical_keypad('A');
-    let mut output_sequence: String = String::new();
-    for button in input_sequence.chars() {
-        let (directions, new_position) = navigate_numerical_keypad(button, position);
-        output_sequence.push_str(&directions);
-        position = new_position;
-    }
-    output_sequence
 }
 
 fn directional_keypad(button: char) -> Position {
@@ -123,47 +128,62 @@ fn directional_keypad(button: char) -> Position {
         'v' => Position { x: 1, y: 1 },
         '>' => Position { x: 2, y: 1 },
         '^' => Position { x: 1, y: 0 },
+        'X' => Position { x: 0, y: 0 },
         _ => panic!("Invalid button!"),
     }
 }
-// This is a separate function because different buttons must be prioritized to avoid the empty space.
-// Robot should adjust horizontally and vertically separately, since hitting consecutive directions
-//      will be faster for the robot that is controlling it.
-fn navigate_directional_keypad(button: char, position: Position) -> (String, Position) {
-    let mut current_position = position;
-    let button_position = directional_keypad(button);
-    let mut button_presses = String::new();
 
-    while current_position.x != button_position.x {
-        if current_position.y < button_position.y {
-            current_position.y += 1;
-            button_presses.push('v')
-        } else if  current_position.x < button_position.x {
-            current_position.x += 1;
-            button_presses.push('>')
-        } else if current_position.x > button_position.x {
-            current_position.x -= 1;
-            button_presses.push('<')
-        } else {
-            current_position.y -= 1;
-            button_presses.push('^');
-        }
+fn get_sequence_from_keypad(input_sequence: &str, keypad_type: KeypadType) -> String {
+    let mut position: Position;
+    match keypad_type {
+        KeypadType::Numerical => position = numerical_keypad('A'),
+        KeypadType::Directional => position = directional_keypad('A'),
     }
-    button_presses.push('A');
 
-    (button_presses, current_position)
-}
-
-fn get_sequence_from_directional_keypad(input_sequence: &str) -> String {
-    let mut position = directional_keypad('A');
     let mut output_sequence: String = String::new();
     for button in input_sequence.chars() {
-        let (directions, new_position) = navigate_directional_keypad(button, position);
+        let (directions, new_position) = navigate_keypad(button, position, keypad_type);
         output_sequence.push_str(&directions);
         position = new_position;
     }
 
     output_sequence
+}
+
+fn move_right() {
+
+}
+
+fn match_horizontal_position(
+    current_position: &mut Position,
+    target_position: Position,
+    button_presses: &mut String,
+) {
+    while current_position.x != target_position.x {
+        if current_position.x < target_position.x {
+            *current_position = current_position.east(1);
+            button_presses.push('>')
+        } else {
+            *current_position = current_position.west(1);
+            button_presses.push('<')
+        }
+    }
+}
+
+fn match_vertical_position(
+    current_position: &mut Position,
+    target_position: Position,
+    button_presses: &mut String,
+) {
+    while current_position.y != target_position.y {
+        if current_position.y < target_position.y {
+            *current_position = current_position.south(1);
+            button_presses.push('v')
+        } else {
+            *current_position = current_position.north(1);
+            button_presses.push('^')
+        }
+    }
 }
 
 fn compute_complexity(numpad_sequences: Vec<String>, final_sequences: Vec<String>) -> i32 {
@@ -181,9 +201,9 @@ fn main() {
     let numpad_sequences = load_button_sequences(_INPUT);
     let mut final_sequences: Vec<String> = Vec::new();
     for sequence_1 in &numpad_sequences {
-        let sequence_2 = get_sequence_from_numerical_keypad(&sequence_1);
-        let sequence_3 = get_sequence_from_directional_keypad(&sequence_2);
-        let sequence_4 = get_sequence_from_directional_keypad(&sequence_3);
+        let sequence_2 = get_sequence_from_keypad(&sequence_1, KeypadType::Numerical);
+        let sequence_3 = get_sequence_from_keypad(&sequence_2, KeypadType::Directional);
+        let sequence_4 = get_sequence_from_keypad(&sequence_3, KeypadType::Directional);
         println!("{}: {}", sequence_4.len(), sequence_4);
         final_sequences.push(sequence_4);
     }
@@ -199,7 +219,7 @@ fn test_example() {
 
     // Get the sequence to control the first robot
     let sequence_1 = &numpad_sequences[0];
-    let sequence_2 = get_sequence_from_numerical_keypad(sequence_1);
+    let sequence_2 = get_sequence_from_keypad(sequence_1, KeypadType::Numerical);
 
     assert!(
         sequence_2 == "<A^A>^^AvvvA"
@@ -209,11 +229,11 @@ fn test_example() {
     );
 
     // Get the sequence to control the second robot
-    let sequence_3 = get_sequence_from_directional_keypad(&sequence_2);
+    let sequence_3 = get_sequence_from_keypad(&sequence_2, KeypadType::Directional);
     assert_eq!(sequence_3.len(), "v<<A>>^A<A>AvA<^AA>A<vAAA>^A".len());
 
     // Get the sequence to control the third robot
-    let sequence_4 = get_sequence_from_directional_keypad(&sequence_3);
+    let sequence_4 = get_sequence_from_keypad(&sequence_3, KeypadType::Directional);
     assert_eq!(
         sequence_4.len(),
         "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A".len()
@@ -230,11 +250,11 @@ fn test_compute_complexity() {
         "379A".to_string(),
     ];
     let final_sequences = vec![
-    "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A".to_string(),
-    "<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A".to_string(),
-    "<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A".to_string(),
-    "<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A".to_string(),
-    "<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A".to_string(),
+        "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A".to_string(),
+        "<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A".to_string(),
+        "<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A".to_string(),
+        "<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A".to_string(),
+        "<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A".to_string(),
     ];
 
     let complexity = compute_complexity(numpad_sequences, final_sequences);
@@ -243,12 +263,12 @@ fn test_compute_complexity() {
 
 #[test]
 fn test_example2() {
-      let numpad_sequences = load_button_sequences(_EXAMPLE2);
+    let numpad_sequences = load_button_sequences(_EXAMPLE2);
     let mut final_sequences: Vec<String> = Vec::new();
     for sequence_1 in &numpad_sequences {
-        let sequence_2 = get_sequence_from_numerical_keypad(&sequence_1);
-        let sequence_3 = get_sequence_from_directional_keypad(&sequence_2);
-        let sequence_4 = get_sequence_from_directional_keypad(&sequence_3);
+        let sequence_2 = get_sequence_from_keypad(&sequence_1, KeypadType::Numerical);
+        let sequence_3 = get_sequence_from_keypad(&sequence_2, KeypadType::Directional);
+        let sequence_4 = get_sequence_from_keypad(&sequence_3, KeypadType::Directional);
         println!("{}: {}", sequence_4.len(), sequence_4);
         final_sequences.push(sequence_4);
     }
