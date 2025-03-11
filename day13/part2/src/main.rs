@@ -1,9 +1,11 @@
 #![allow(arithmetic_overflow)]
 
+use std::collections::HashSet;
 use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
+use std::thread::current;
 
 const _INPUT: &str = "input.txt";
 const _TEST_INPUT: &str = "test_input.txt";
@@ -105,18 +107,19 @@ fn search_for_equilibrium(
     let mut total_x_shifter_presses = 0;
     let mut total_y_shifter_presses = 0;
 
-    // 100 is a magic number that doesn't mean anything. It just happens to be enough for all of the solutions to converge.
-    // Without an arbitrary iteration cap, you could break out of the loop by checking if any of these conditions are met:
-    // 1 - the solution has converged to an equilibrium 
-    // 2 - the solution has diverged (I'm already checking for this with "checkedmul". Otherwise, the program would crash due to overflows.)
-    // 3 - the solution has dances around an equilibrium but never reaches a steady state (like a sine wave / periodic function).
-    // #3 is difficult to check for, which is why I haven't bothered. You could probably do it by using a hashmap to look for repeat (x, y) pairs.
-    for _i in 0..100 {
+    // There are three outcomes that will break this loop:
+    // 1 - the output has converged to an equilibrium - return the A and B presses used to get here
+    // 2 - the output has diverged - output becomes so large that an integer overflow occurs. No solution.
+    // 3 - the output dances around an equilibrium but never reaches a steady state (like a sine wave / periodic function). No solution.
+    //      #3 is checked for by looking for duplicates in a list of visited positions. This is the only case where we visit the same position twice.
+
+    let mut visited_positions: HashSet<Position> = HashSet::new();
+    loop {
+        // Force X position toward target
         let amount_to_move_x = claw_machine.prize.x - current_position.x;
-        let x_shifter_presses =
-            (amount_to_move_x as f64 / x_shifter.x as f64).floor() as i64;  // Need to floor the first button_presses and ceil the second.
-        total_x_shifter_presses += x_shifter_presses;                       // Otherwise, the program can get stuck right next to the solution.
-                                                                            
+        let x_shifter_presses = (amount_to_move_x as f64 / x_shifter.x as f64).floor() as i64; // Need to floor the first button_presses and ceil the second.
+        total_x_shifter_presses += x_shifter_presses; // Otherwise, the program can get stuck right next to the solution.
+
         match i64::checked_mul(x_shifter_presses, x_shifter.x) {
             Some(mul) => current_position.x += mul,
             None => break,
@@ -126,11 +129,19 @@ fn search_for_equilibrium(
             None => break,
         }
 
-        // eprintln!("{}", current_position);
+        // Check break conditions
+        if current_position == claw_machine.prize {
+            break
+        }
+        if visited_positions.get(&current_position) != None {
+            return None
+        }
+        visited_positions.insert(current_position);
 
+
+        // Force Y position toward target
         let amount_to_move_y = claw_machine.prize.y - current_position.y;
-        let y_shifter_presses =
-            (amount_to_move_y as f64 / y_shifter.y as f64).ceil() as i64; 
+        let y_shifter_presses = (amount_to_move_y as f64 / y_shifter.y as f64).ceil() as i64;
         total_y_shifter_presses += y_shifter_presses;
 
         match i64::checked_mul(y_shifter_presses, y_shifter.x) {
@@ -142,14 +153,19 @@ fn search_for_equilibrium(
             None => break,
         }
 
-        // eprintln!("{}", current_position);
+        // Check break conditions
+        if current_position == claw_machine.prize {
+            break;
+        }
+        if visited_positions.get(&current_position) != None {
+            return None
+        }
+        visited_positions.insert(current_position);
+
     }
 
     if current_position == claw_machine.prize {
-        return Some((
-            total_x_shifter_presses,
-            total_y_shifter_presses,
-        ));
+        return Some((total_x_shifter_presses, total_y_shifter_presses));
     } else {
         return None;
     }
