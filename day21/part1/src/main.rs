@@ -46,6 +46,49 @@ impl fmt::Display for Position {
         write!(f, "({}, {})", self.x, self.y)
     }
 }
+struct Robots {
+    one: Robot,
+    two: Robot,
+    three: Robot,
+}
+impl Robots {
+    fn new(input: String) -> Robots {
+        Robots {
+            one: Robot::new(
+                Keypad::Numerical,
+                button_to_position('A', Keypad::Numerical),
+                input,
+            ),
+            two: Robot::new(
+                Keypad::Directional,
+                button_to_position('A', Keypad::Directional),
+                String::new(),
+            ),
+            three: Robot::new(
+                Keypad::Directional,
+                button_to_position('A', Keypad::Directional),
+                String::new(),
+            ),
+        }
+    }
+}
+
+struct Robot {
+    keypad: Keypad,
+    position: Position,
+    input: String,
+    output: String,
+}
+impl Robot {
+    fn new(keypad: Keypad, position: Position, input: String) -> Robot {
+        Robot {
+            keypad: keypad,
+            position: position,
+            input: input,
+            output: String::new(),
+        }
+    }
+}
 
 fn load_button_sequences(name: &str) -> Vec<String> {
     let path = Path::new(name);
@@ -61,128 +104,115 @@ fn load_button_sequences(name: &str) -> Vec<String> {
     button_sequences
 }
 
-fn numerical_keypad(button: char) -> Position {
-    match button {
-        'A' => Position { x: 2, y: 3 },
-        '0' => Position { x: 1, y: 3 },
-        '1' => Position { x: 0, y: 2 },
-        '2' => Position { x: 1, y: 2 },
-        '3' => Position { x: 2, y: 2 },
-        '4' => Position { x: 0, y: 1 },
-        '5' => Position { x: 1, y: 1 },
-        '6' => Position { x: 2, y: 1 },
-        '7' => Position { x: 0, y: 0 },
-        '8' => Position { x: 1, y: 0 },
-        '9' => Position { x: 2, y: 0 },
-        'X' => Position { x: 0, y: 3 },
-        _ => panic!("Invalid button!"),
+fn button_to_position(button: char, keypad_type: Keypad) -> Position {
+    match keypad_type {
+        Keypad::Numerical => match button {
+            'A' => Position { x: 2, y: 3 },
+            '0' => Position { x: 1, y: 3 },
+            '1' => Position { x: 0, y: 2 },
+            '2' => Position { x: 1, y: 2 },
+            '3' => Position { x: 2, y: 2 },
+            '4' => Position { x: 0, y: 1 },
+            '5' => Position { x: 1, y: 1 },
+            '6' => Position { x: 2, y: 1 },
+            '7' => Position { x: 0, y: 0 },
+            '8' => Position { x: 1, y: 0 },
+            '9' => Position { x: 2, y: 0 },
+            _ => panic!("Invalid button!"),
+        },
+        Keypad::Directional => match button {
+            'A' => Position { x: 2, y: 0 },
+            '<' => Position { x: 0, y: 1 },
+            'v' => Position { x: 1, y: 1 },
+            '>' => Position { x: 2, y: 1 },
+            '^' => Position { x: 1, y: 0 },
+            _ => panic!("Invalid button!"),
+        },
+    }
+}
+
+fn position_to_button(position: Position, keypad_type: Keypad) -> char {
+    match keypad_type {
+        Keypad::Numerical => match position {
+            Position { x: 2, y: 3 } => 'A',
+            Position { x: 1, y: 3 } => '0',
+            Position { x: 0, y: 2 } => '1',
+            Position { x: 1, y: 2 } => '2',
+            Position { x: 2, y: 2 } => '3',
+            Position { x: 0, y: 1 } => '4',
+            Position { x: 1, y: 1 } => '5',
+            Position { x: 2, y: 1 } => '6',
+            Position { x: 0, y: 0 } => '7',
+            Position { x: 1, y: 0 } => '8',
+            Position { x: 2, y: 0 } => '9',
+            _ => '\0',
+        },
+        Keypad::Directional => match position {
+            Position { x: 2, y: 0 } => 'A',
+            Position { x: 0, y: 1 } => '<',
+            Position { x: 1, y: 1 } => 'v',
+            Position { x: 2, y: 1 } => '>',
+            Position { x: 1, y: 0 } => '^',
+            _ => '\0',
+        },
     }
 }
 
 #[derive(Clone, Copy)]
-enum KeypadType {
+enum Keypad {
     Numerical,
     Directional,
 }
 
-fn navigate_keypad(button: char, position: Position, keypad_type: KeypadType) -> (String, Position) {
-    let mut current_position = position;
-    let mut button_presses = String::new();
-
-    let button_position: Position;
-    let empty_space: Position;
-    match keypad_type {
-        KeypadType::Numerical => {
-            button_position = numerical_keypad(button);
-            empty_space = numerical_keypad('X');
-        }
-        KeypadType::Directional => {
-            button_position = directional_keypad(button);
-            empty_space = directional_keypad('X');
-        }
-    }
-    // If we moved in a certain direction to get to the previous button, we should prioritize moving in that direction first.
-
-    
-
-    if empty_space.x != current_position.x {
-        match_vertical_position(&mut current_position, button_position, &mut button_presses);
-        assert_ne!(current_position, empty_space);
-        match_horizontal_position(&mut current_position, button_position, &mut button_presses);
-        assert_ne!(current_position, empty_space);
-    } else {
-        match_horizontal_position(&mut current_position, button_position, &mut button_presses);
-        assert_ne!(current_position, empty_space);
-        match_vertical_position(&mut current_position, button_position, &mut button_presses);
-        assert_ne!(current_position, empty_space);
-    }
-    button_presses.push('A');
-
-    (button_presses, current_position)
-}
-
-fn directional_keypad(button: char) -> Position {
-    match button {
-        'A' => Position { x: 2, y: 0 },
-        '<' => Position { x: 0, y: 1 },
-        'v' => Position { x: 1, y: 1 },
-        '>' => Position { x: 2, y: 1 },
-        '^' => Position { x: 1, y: 0 },
-        'X' => Position { x: 0, y: 0 },
-        _ => panic!("Invalid button!"),
-    }
-}
-
-fn get_sequence_from_keypad(input_sequence: &str, keypad_type: KeypadType) -> String {
-    let mut position: Position;
-    match keypad_type {
-        KeypadType::Numerical => position = numerical_keypad('A'),
-        KeypadType::Directional => position = directional_keypad('A'),
-    }
-
-    let mut output_sequence: String = String::new();
-    for button in input_sequence.chars() {
-        let (directions, new_position) = navigate_keypad(button, position, keypad_type);
-        output_sequence.push_str(&directions);
-        position = new_position;
-    }
-
-    output_sequence
-}
-
-fn move_right() {
-
-}
-
-fn match_horizontal_position(
-    current_position: &mut Position,
-    target_position: Position,
-    button_presses: &mut String,
+fn navigate_keypad(
+    position: Position,
+    input: &Vec<char>,
+    progress: usize,
+    keypad: Keypad,
+    sequence: &mut String,
+    sequences: &mut Vec<String>,
 ) {
-    while current_position.x != target_position.x {
-        if current_position.x < target_position.x {
-            *current_position = current_position.east(1);
-            button_presses.push('>')
-        } else {
-            *current_position = current_position.west(1);
-            button_presses.push('<')
-        }
+    if progress >= input.len() {
+        sequences.push((*sequence).clone());
+        return
     }
-}
 
-fn match_vertical_position(
-    current_position: &mut Position,
-    target_position: Position,
-    button_presses: &mut String,
-) {
-    while current_position.y != target_position.y {
-        if current_position.y < target_position.y {
-            *current_position = current_position.south(1);
-            button_presses.push('v')
-        } else {
-            *current_position = current_position.north(1);
-            button_presses.push('^')
-        }
+    let target = button_to_position(input[progress], keypad);
+    if position == target {
+        sequence.push('A');
+        navigate_keypad(position, input, progress+1, keypad, sequence, sequences);
+        sequence.pop();
+        return
+    }
+   
+    let mut next_position: Position;
+
+    next_position = position.east(1);
+    if position.x < target.x && position_to_button(next_position, keypad) != '\0' {
+        sequence.push('>');
+        navigate_keypad(next_position, input, progress, keypad, sequence, sequences);
+        sequence.pop();
+    }
+
+    next_position = position.west(1);
+    if position.x > target.x && position_to_button(next_position, keypad) != '\0' {
+        sequence.push('<');
+        navigate_keypad(next_position, input, progress, keypad, sequence, sequences);
+        sequence.pop();
+    }
+
+    next_position = position.south(1);
+    if position.y < target.y && position_to_button(next_position, keypad) != '\0' {
+        sequence.push('v');
+        navigate_keypad(next_position, input, progress, keypad, sequence, sequences);
+        sequence.pop();
+    }
+
+    next_position = position.north(1);
+    if position.y > target.y && position_to_button(next_position, keypad) != '\0' {
+        sequence.push('^');
+        navigate_keypad(next_position, input, progress, keypad, sequence, sequences);
+        sequence.pop();
     }
 }
 
@@ -198,46 +228,35 @@ fn compute_complexity(numpad_sequences: Vec<String>, final_sequences: Vec<String
 }
 
 fn main() {
-    let numpad_sequences = load_button_sequences(_INPUT);
-    let mut final_sequences: Vec<String> = Vec::new();
-    for sequence_1 in &numpad_sequences {
-        let sequence_2 = get_sequence_from_keypad(&sequence_1, KeypadType::Numerical);
-        let sequence_3 = get_sequence_from_keypad(&sequence_2, KeypadType::Directional);
-        let sequence_4 = get_sequence_from_keypad(&sequence_3, KeypadType::Directional);
-        println!("{}: {}", sequence_4.len(), sequence_4);
-        final_sequences.push(sequence_4);
-    }
 
-    // Get the complexity
-    let complexity = compute_complexity(numpad_sequences, final_sequences);
-    println!("Total complexity: {}", complexity)
+    
 }
 
 #[test]
 fn test_example() {
-    let numpad_sequences = load_button_sequences(_EXAMPLE);
+    // let numpad_sequences = load_button_sequences(_EXAMPLE);
 
-    // Get the sequence to control the first robot
-    let sequence_1 = &numpad_sequences[0];
-    let sequence_2 = get_sequence_from_keypad(sequence_1, KeypadType::Numerical);
+    // // Get the sequence to control the first robot
+    // let sequence_1 = &numpad_sequences[0];
+    // let sequence_2 = get_sequence_from_keypad(sequence_1, Keypad::Numerical);
 
-    assert!(
-        sequence_2 == "<A^A>^^AvvvA"
-            || sequence_2 == "<A^A^>^AvvvA"
-            || sequence_2 == "<A^A^^>AvvvA",
-        "First robot failed to find the shortest sequence!"
-    );
+    // assert!(
+    //     sequence_2 == "<A^A>^^AvvvA"
+    //         || sequence_2 == "<A^A^>^AvvvA"
+    //         || sequence_2 == "<A^A^^>AvvvA",
+    //     "First robot failed to find the shortest sequence!"
+    // );
 
-    // Get the sequence to control the second robot
-    let sequence_3 = get_sequence_from_keypad(&sequence_2, KeypadType::Directional);
-    assert_eq!(sequence_3.len(), "v<<A>>^A<A>AvA<^AA>A<vAAA>^A".len());
+    // // Get the sequence to control the second robot
+    // let sequence_3 = get_sequence_from_keypad(&sequence_2, Keypad::Directional);
+    // assert_eq!(sequence_3.len(), "v<<A>>^A<A>AvA<^AA>A<vAAA>^A".len());
 
-    // Get the sequence to control the third robot
-    let sequence_4 = get_sequence_from_keypad(&sequence_3, KeypadType::Directional);
-    assert_eq!(
-        sequence_4.len(),
-        "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A".len()
-    );
+    // // Get the sequence to control the third robot
+    // let sequence_4 = get_sequence_from_keypad(&sequence_3, Keypad::Directional);
+    // assert_eq!(
+    //     sequence_4.len(),
+    //     "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A".len()
+    // );
 }
 
 #[test]
@@ -263,17 +282,26 @@ fn test_compute_complexity() {
 
 #[test]
 fn test_example2() {
+   
+}
+
+#[test]
+fn get_shortest_paths_for_first_robot() {
     let numpad_sequences = load_button_sequences(_EXAMPLE2);
-    let mut final_sequences: Vec<String> = Vec::new();
-    for sequence_1 in &numpad_sequences {
-        let sequence_2 = get_sequence_from_keypad(&sequence_1, KeypadType::Numerical);
-        let sequence_3 = get_sequence_from_keypad(&sequence_2, KeypadType::Directional);
-        let sequence_4 = get_sequence_from_keypad(&sequence_3, KeypadType::Directional);
-        println!("{}: {}", sequence_4.len(), sequence_4);
-        final_sequences.push(sequence_4);
+    let input: Vec<char> = numpad_sequences[0].chars().collect();
+
+    let position = button_to_position('A', Keypad::Numerical);
+    let mut sequence = String::new();
+    let mut sequences: Vec<String> = Vec::new();
+    navigate_keypad(position, &input, 0, Keypad::Numerical, &mut sequence, &mut sequences); 
+
+    for sequence in sequences {
+        println!("{}", sequence);
     }
 
+
+
     // Get the complexity
-    let complexity = compute_complexity(numpad_sequences, final_sequences);
-    assert_eq!(complexity, 126384);
+    // let complexity = compute_complexity(numpad_sequences, final_sequences);
+    // assert_eq!(complexity, 126384);
 }

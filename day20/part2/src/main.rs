@@ -68,6 +68,8 @@ fn _print_grid(grid: &Vec<Vec<char>>) {
     println!();
 }
 
+// Repurposed old code to walk through each space from start to finish, recording the coordinates
+// of each space along with the number of steps it took to get to each one.
 fn pathfind(
     racer: &mut Position,
     track: &mut Vec<Vec<char>>,
@@ -135,13 +137,10 @@ fn find_start_point(grid: &Vec<Vec<char>>) -> Position {
 }
 
 fn found_exit(track: &Vec<Vec<char>>, position: Position) -> bool {
-    if track[position.y as usize][position.x as usize] == 'E' {
-        return true;
-    } else {
-        return false;
-    }
+    track[position.y as usize][position.x as usize] == 'E'
 }
 
+// Calculates the time save for a single cheat
 fn test_cheat(
     spaces: &HashMap<Position, i32>,
     position_start: Position,
@@ -159,6 +158,7 @@ fn test_cheat(
     }
 }
 
+// Goes Calculates the time saves for every cheat that is possible from a given space.
 fn test_all_cheats_for_space(
     spaces: &HashMap<Position, i32>,
     (position, time): (Position, i32),
@@ -171,6 +171,10 @@ fn test_all_cheats_for_space(
     }
 }
 
+// This creates a list of every position you could cheat to from a given space, with a given max
+// cheat time.
+// It does this by essentially creating a diamond shape around the center of an array, with the array cenetered at the
+// starting space's position, and pushing the coordinates of those positions to a vector.
 fn assemble_cheat_list(max_cheat_time: usize, position: Position) -> Vec<Position> {
     let mut cheatable_spaces: Vec<Position> = Vec::new();
 
@@ -195,9 +199,8 @@ fn main() {
     let mut racer = find_start_point(&track);
     let mut spaces: HashMap<Position, i32> = HashMap::new();
     let mut steps = 0;
-    _print_grid(&track);
     pathfind(&mut racer, &mut track, &mut spaces, &mut steps);
-    println!("The race was finished in {} picoseconds", steps);
+    println!("The race was finished without cheating in {} picoseconds", steps);
 
     let mut cheating_timesaves: Vec<i32> = Vec::new();
     let max_cheat_time = 20;
@@ -210,9 +213,6 @@ fn main() {
         if timesave >= minimum_timesave_allowed {
             best_timesaves.push(timesave);
         }
-    }
-    for timesave in &best_timesaves {
-        println!("{}", timesave);
     }
     println!(
         "\nNumber of cheats that save 100+ picoseconds: {}\n",
@@ -252,7 +252,7 @@ fn print_website_example() {
 }
 
 #[test]
-fn print_test_assemble_cheat_array() {
+fn print_assemble_cheat_array() {
     let cheat_list= assemble_cheat_list(20, Position { x: 0, y: 0});
     for i in cheat_list {
         println!("{}", i);
