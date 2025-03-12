@@ -176,141 +176,95 @@ fn navigate_keypad(
     }
 }
 
-fn compute_complexity(numpad_sequences: Vec<String>, final_sequences: Vec<String>) -> i32 {
+fn compute_complexity(numpad_codes: &Vec<String>, final_lengths: &Vec<usize>) -> usize {
+
     let mut complexity = 0;
-    let mut numpad_codes = numpad_sequences.into_iter();
-    for sequence in &final_sequences {
-        let mut code = numpad_codes.next().unwrap();
-        code.retain(|c| c.is_numeric());
-        complexity += (code.parse::<usize>().unwrap()) * sequence.len();
+    let mut lengths_iter = final_lengths.iter();
+    for code in numpad_codes {
+        let mut filtered_code = code.clone();
+        filtered_code.retain(|c| c.is_numeric());
+
+        let length = lengths_iter.next().unwrap();
+
+        complexity += (filtered_code.parse::<usize>().unwrap()) * length;
     }
-    complexity as i32
+
+    complexity
 }
 
-fn main() {}
-
-#[test]
-fn test_example() {
-    // let numpad_sequences = load_button_sequences(_EXAMPLE);
-
-    // // Get the sequence to control the first robot
-    // let sequence_1 = &numpad_sequences[0];
-    // let sequence_2 = get_sequence_from_keypad(sequence_1, Keypad::Numerical);
-
-    // assert!(
-    //     sequence_2 == "<A^A>^^AvvvA"
-    //         || sequence_2 == "<A^A^>^AvvvA"
-    //         || sequence_2 == "<A^A^^>AvvvA",
-    //     "First robot failed to find the shortest sequence!"
-    // );
-
-    // // Get the sequence to control the second robot
-    // let sequence_3 = get_sequence_from_keypad(&sequence_2, Keypad::Directional);
-    // assert_eq!(sequence_3.len(), "v<<A>>^A<A>AvA<^AA>A<vAAA>^A".len());
-
-    // // Get the sequence to control the third robot
-    // let sequence_4 = get_sequence_from_keypad(&sequence_3, Keypad::Directional);
-    // assert_eq!(
-    //     sequence_4.len(),
-    //     "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A".len()
-    // );
-}
-
-#[test]
-fn test_compute_complexity() {
-    let numpad_sequences = vec![
-        "029A".to_string(),
-        "980A".to_string(),
-        "179A".to_string(),
-        "456A".to_string(),
-        "379A".to_string(),
-    ];
-    let final_sequences = vec![
-        "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A".to_string(),
-        "<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A".to_string(),
-        "<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A".to_string(),
-        "<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A".to_string(),
-        "<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A".to_string(),
-    ];
-
-    let complexity = compute_complexity(numpad_sequences, final_sequences);
-    assert_eq!(complexity, 126384);
-}
-
-#[test]
-fn test_example2() {
-    let numpad_sequences = load_button_sequences(_EXAMPLE2);
-    let input: Vec<char> = numpad_sequences[0].chars().collect();
-
-    // First robot
-    let position = button_to_position('A', Keypad::Numerical);
+fn get_shortest_sequences(input: &Vec<char>, keypad: Keypad) -> Vec<String> {
+    let position = button_to_position('A', keypad);
     let mut sequence = String::new();
-    let mut sequences1: Vec<String> = Vec::new();
-    navigate_keypad(
-        position,
-        &input,
-        0,
-        Keypad::Numerical,
-        &mut sequence,
-        &mut sequences1,
-    );
+    let mut sequences: Vec<String> = Vec::new();
+    navigate_keypad(position, &input, 0, keypad, &mut sequence, &mut sequences);
 
-    println!("\nShortest sequences for first robot:\n");
-    for sequence in &sequences1 {
-        println!("{}", sequence);
-    }
+    sequences
+}
 
-    // Second robot
-    let position = button_to_position('A', Keypad::Directional);
-    sequence.clear();
+fn get_shortest_sequence_len(input: &Vec<char>) -> usize {
+    // Find the set of shortest sequences for the first robot
+    let sequences1 = get_shortest_sequences(&input, Keypad::Numerical);
+
+    // Find the set of shortest sequences for the second robot to produce all of the first robot's sequences
     let mut sequences2: Vec<String> = Vec::new();
-    for sequence1 in &sequences1 {
-        let input: Vec<char> = sequence1.chars().collect();
-        navigate_keypad(
-            position,
-            &input,
-            0,
-            Keypad::Directional,
-            &mut sequence,
-            &mut sequences2,
-        );
+    for sequence in &sequences1 {
+        let input: Vec<char> = sequence.chars().collect();
+        sequences2.append(&mut get_shortest_sequences(&input, Keypad::Directional));
     }
 
-    println!("\nShortest sequences for second robot:\n");
-    for sequence in &sequences2 {
-        println!("{}", sequence);
-    }
-
-    // Third robot
-    let position = button_to_position('A', Keypad::Directional);
-    sequence.clear();
+    // Find the set of shortest sequences for the third robot to produce all of the second robot's sequences
     let mut sequences3: Vec<String> = Vec::new();
-    for sequence2 in &sequences2 {
-        let input: Vec<char> = sequence2.chars().collect();
-        navigate_keypad(
-            position,
-            &input,
-            0,
-            Keypad::Directional,
-            &mut sequence,
-            &mut sequences3,
-        );
+    for sequence in &sequences2 {
+        let input: Vec<char> = sequence.chars().collect();
+        sequences3.append(&mut get_shortest_sequences(&input, Keypad::Directional));
     }
 
-    println!("\nToo many sequences for third robot to print all of them.\n");
+    // Find the shortest length of all the sequences for the third set
     let mut min_sequence_len: Option<usize> = None;
     for sequence in &sequences3 {
-
         if let Some(min_len) = min_sequence_len {
-            min_sequence_len = Some(min_len.min(sequence.len())) ;
+            min_sequence_len = Some(min_len.min(sequence.len()));
         } else {
             min_sequence_len = Some(sequence.len());
         }
     }
 
-    println!("\nLength of shortest sequence: {}", min_sequence_len.unwrap());
+    min_sequence_len.unwrap()
+}
+
+fn main() {
+    let numpad_sequences = load_button_sequences(_INPUT);
+
+   // Compute the lengths of all the shortest button press sequences
+    let mut lengths: Vec<usize> = Vec::new();
+    for sequence in &numpad_sequences {
+        let input: Vec<char> = sequence.chars().collect();
+        lengths.push(get_shortest_sequence_len(&input));
+    }
 
     // Get the complexity
-    // let complexity = compute_complexity(numpad_sequences, final_sequences);
-    // assert_eq!(complexity, 126384);
+    let complexity = compute_complexity(&numpad_sequences, &lengths);
+    println!("Complexity: {}", complexity);
+}
+
+#[test]
+fn test_example() {
+    let numpad_sequences = load_button_sequences(_EXAMPLE2);
+
+    // Compute the lengths of all the shortest button press sequences
+    let mut lengths: Vec<usize> = Vec::new();
+    for sequence in &numpad_sequences {
+        let input: Vec<char> = sequence.chars().collect();
+        lengths.push(get_shortest_sequence_len(&input));
+    }
+
+    assert_eq!(lengths[0], 68);
+    assert_eq!(lengths[1], 60);
+    assert_eq!(lengths[2], 68);
+    assert_eq!(lengths[3], 64);
+    assert_eq!(lengths[4], 64);
+
+    // Get the complexity
+    let complexity = compute_complexity(&numpad_sequences, &lengths);
+    assert_eq!(complexity, 126384);
 }
