@@ -46,49 +46,6 @@ impl fmt::Display for Position {
         write!(f, "({}, {})", self.x, self.y)
     }
 }
-struct Robots {
-    one: Robot,
-    two: Robot,
-    three: Robot,
-}
-impl Robots {
-    fn new(input: String) -> Robots {
-        Robots {
-            one: Robot::new(
-                Keypad::Numerical,
-                button_to_position('A', Keypad::Numerical),
-                input,
-            ),
-            two: Robot::new(
-                Keypad::Directional,
-                button_to_position('A', Keypad::Directional),
-                String::new(),
-            ),
-            three: Robot::new(
-                Keypad::Directional,
-                button_to_position('A', Keypad::Directional),
-                String::new(),
-            ),
-        }
-    }
-}
-
-struct Robot {
-    keypad: Keypad,
-    position: Position,
-    input: String,
-    output: String,
-}
-impl Robot {
-    fn new(keypad: Keypad, position: Position, input: String) -> Robot {
-        Robot {
-            keypad: keypad,
-            position: position,
-            input: input,
-            output: String::new(),
-        }
-    }
-}
 
 fn load_button_sequences(name: &str) -> Vec<String> {
     let path = Path::new(name);
@@ -173,20 +130,23 @@ fn navigate_keypad(
     sequences: &mut Vec<String>,
 ) {
     if progress >= input.len() {
+        // One shortest sequence has been found
         sequences.push((*sequence).clone());
-        return
+        return;
     }
 
     let target = button_to_position(input[progress], keypad);
     if position == target {
+        // Robot is hovering over the target button - begin on the next button
         sequence.push('A');
-        navigate_keypad(position, input, progress+1, keypad, sequence, sequences);
+        navigate_keypad(position, input, progress + 1, keypad, sequence, sequences);
         sequence.pop();
-        return
+        return;
     }
-   
+
     let mut next_position: Position;
 
+    // Try moving in directions that bring the robot immediately closer to the target button.
     next_position = position.east(1);
     if position.x < target.x && position_to_button(next_position, keypad) != '\0' {
         sequence.push('>');
@@ -227,10 +187,7 @@ fn compute_complexity(numpad_sequences: Vec<String>, final_sequences: Vec<String
     complexity as i32
 }
 
-fn main() {
-
-    
-}
+fn main() {}
 
 #[test]
 fn test_example() {
@@ -282,24 +239,76 @@ fn test_compute_complexity() {
 
 #[test]
 fn test_example2() {
-   
-}
-
-#[test]
-fn get_shortest_paths_for_first_robot() {
     let numpad_sequences = load_button_sequences(_EXAMPLE2);
     let input: Vec<char> = numpad_sequences[0].chars().collect();
 
+    // First robot
     let position = button_to_position('A', Keypad::Numerical);
     let mut sequence = String::new();
-    let mut sequences: Vec<String> = Vec::new();
-    navigate_keypad(position, &input, 0, Keypad::Numerical, &mut sequence, &mut sequences); 
+    let mut sequences1: Vec<String> = Vec::new();
+    navigate_keypad(
+        position,
+        &input,
+        0,
+        Keypad::Numerical,
+        &mut sequence,
+        &mut sequences1,
+    );
 
-    for sequence in sequences {
+    println!("\nShortest sequences for first robot:\n");
+    for sequence in &sequences1 {
         println!("{}", sequence);
     }
 
+    // Second robot
+    let position = button_to_position('A', Keypad::Directional);
+    sequence.clear();
+    let mut sequences2: Vec<String> = Vec::new();
+    for sequence1 in &sequences1 {
+        let input: Vec<char> = sequence1.chars().collect();
+        navigate_keypad(
+            position,
+            &input,
+            0,
+            Keypad::Directional,
+            &mut sequence,
+            &mut sequences2,
+        );
+    }
 
+    println!("\nShortest sequences for second robot:\n");
+    for sequence in &sequences2 {
+        println!("{}", sequence);
+    }
+
+    // Third robot
+    let position = button_to_position('A', Keypad::Directional);
+    sequence.clear();
+    let mut sequences3: Vec<String> = Vec::new();
+    for sequence2 in &sequences2 {
+        let input: Vec<char> = sequence2.chars().collect();
+        navigate_keypad(
+            position,
+            &input,
+            0,
+            Keypad::Directional,
+            &mut sequence,
+            &mut sequences3,
+        );
+    }
+
+    println!("\nToo many sequences for third robot to print all of them.\n");
+    let mut min_sequence_len: Option<usize> = None;
+    for sequence in &sequences3 {
+
+        if let Some(min_len) = min_sequence_len {
+            min_sequence_len = Some(min_len.min(sequence.len())) ;
+        } else {
+            min_sequence_len = Some(sequence.len());
+        }
+    }
+
+    println!("\nLength of shortest sequence: {}", min_sequence_len.unwrap());
 
     // Get the complexity
     // let complexity = compute_complexity(numpad_sequences, final_sequences);
