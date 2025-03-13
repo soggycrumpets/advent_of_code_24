@@ -1,0 +1,4 @@
+Here's a hypothesis for part2:
+
+Every numpad instruction has a constant growth rate.
+When you take the growth of the entire instruction set, there is no consistent rate, although you could approximate it as ~2.5x/iter
