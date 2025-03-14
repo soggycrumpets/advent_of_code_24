@@ -5,7 +5,6 @@ use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
-use std::thread::current;
 
 const _INPUT: &str = "input.txt";
 const _TEST_INPUT: &str = "test_input.txt";
@@ -92,14 +91,14 @@ fn load_claw_machines_from_file(name: &str, part2: bool) -> Vec<ClawMachine> {
 
 // Here's the general idea behind this function:
 // One of the buttons is the "x-shifter" and the other is the "y-shifter"
-// The x-shifter button is pressed/unpressed (yes, you can't actually un-press the buttons, but pretend you can) until the 
+// The x-shifter button is pressed/unpressed (yes, you can't actually un-press the buttons, but pretend you can) until the
 //      current x-position is as close as it can get to the prize's x-position
 // Then, the y-shifter button is pressed/unpressed until the current y-position matches the prize's y-position
 // This repeats for a while. If the current position converges to a single (x, y) coordinate, a solution has been found.
 // The function returns the number of times each button was pressed to reach this point.
 // This function is called twice, once with button A being the x-shifter and the other with B being x-shifter.
 // If neither of these converge on a single coordinate, then there is no solution.
-fn search_for_equilibrium(
+fn force_crane_into_position(
     claw_machine: &ClawMachine,
     x_shifter: &Position,
     y_shifter: &Position,
@@ -132,13 +131,12 @@ fn search_for_equilibrium(
 
         // Check break conditions
         if current_position == claw_machine.prize {
-            break
+            break;
         }
         if visited_positions.get(&current_position) != None {
-            return None
+            return None;
         }
         visited_positions.insert(current_position);
-
 
         // Force Y position toward target
         let amount_to_move_y = claw_machine.prize.y - current_position.y;
@@ -159,10 +157,9 @@ fn search_for_equilibrium(
             break;
         }
         if visited_positions.get(&current_position) != None {
-            return None
+            return None;
         }
         visited_positions.insert(current_position);
-
     }
 
     if current_position == claw_machine.prize {
@@ -176,15 +173,15 @@ fn compute_minimum_cost(claw_machine: ClawMachine) -> i64 {
     let a_press_cost = 3;
     let b_press_cost = 1;
 
-    // A as x-shifter converges on a solution
-    match search_for_equilibrium(&claw_machine, &claw_machine.a, &claw_machine.b) {
+    // A as x-shifter
+    match force_crane_into_position(&claw_machine, &claw_machine.a, &claw_machine.b) {
         Some((a_presses, b_presses)) => return a_presses * a_press_cost + b_presses * b_press_cost,
-        None => (),
+        None => {}
     }
-    // B as x-shifter converges on a solution
-    match search_for_equilibrium(&claw_machine, &claw_machine.b, &claw_machine.a) {
+    // B as x-shifter
+    match force_crane_into_position(&claw_machine, &claw_machine.b, &claw_machine.a) {
         Some((b_presses, a_presses)) => return a_presses * a_press_cost + b_presses * b_press_cost,
-        None => (),
+        None => {}
     }
 
     // No solution
@@ -201,8 +198,6 @@ fn compute_minimum_cost_sum(claw_machines: Vec<ClawMachine>) -> i64 {
 }
 
 fn main() {
-let Timer
-
     let claw_machines = load_claw_machines_from_file(_INPUT, true);
     let minimum_total_cost = compute_minimum_cost_sum(claw_machines);
     println!("Minimum total cost: {}", minimum_total_cost);
