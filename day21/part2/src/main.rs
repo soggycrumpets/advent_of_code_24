@@ -1,5 +1,7 @@
+use std::collections::HashMap;
 use std::fmt;
 use std::fs::File;
+use std::hash::Hash;
 use std::io::prelude::*;
 use std::path::Path;
 
@@ -189,7 +191,7 @@ fn move_until_matching(
                 next_button_presses.push('>')
             }
         }
-       '<' => {
+        '<' => {
             while next_position.x > target_position.x {
                 next_position = next_position.west(1);
                 next_button_presses.push('<')
@@ -228,6 +230,7 @@ fn compute_complexity(numpad_sequences: Vec<String>, final_sequences: Vec<String
     complexity as i32
 }
 
+// A transition is a string of two characters describing the transition from one instruction to another
 fn define_transitions() -> Vec<String> {
     let mut transitions: Vec<String> = Vec::new();
 
@@ -240,81 +243,129 @@ fn define_transitions() -> Vec<String> {
             transitions.push(transition);
         }
     }
-
     transitions
 }
 
-// A "translation" is the set of inputs requried to get the best path to get from one button to another
-fn define_translations(transitions: &Vec<String>) -> Vec<String> {
-    let mut translations: Vec<String> = Vec::new();
+// A translation is the set of inputs requried to get the best path to get from one instruction to another
+fn define_translations(transitions: &Vec<String>) -> HashMap<String, String> {
+    let mut translations: HashMap<String, String> = HashMap::new();
     for transition in transitions {
         let instructions: Vec<char> = transition.chars().collect();
-        let (mut translation, _)= navigate_keypad(
+        let (mut translation, _) = navigate_keypad(
             instructions[1],
             button_to_position(instructions[0], Keypad::Directional),
             Keypad::Directional,
         );
         translation.pop();
-        translations.push(translation);
+        translations.insert(transition.clone(), translation);
     }
-
     translations
 }
 
-fn extract_transitions_from_sequence(sequence: &str) -> Vec<String> {
+fn extract_transitions_from_sequence(sequence: &str) -> HashMap<String, u64> {
     let chars: Vec<char> = sequence.chars().collect();
-    let mut transitions: Vec<String> = Vec::new();
-    for i in 0..chars.len()-1 {
+    let mut transitions: HashMap<String, u64> = HashMap::new();
+
+    // The first transition is a special case; it's always A -> first button press
+    let first_transition: String = vec!['A', chars[0]].into_iter().collect();
+    transitions.insert(first_transition.clone(), 1);
+
+    for i in 0..chars.len() - 1 {
         let mut transition = String::new();
         transition.push(chars[i]);
-        transition.push(chars[i+1]);
-        transitions.push(transition);
+        transition.push(chars[i + 1]);
+        if let Some(occurances) = transitions.get_mut(&transition) {
+            *occurances += 1;
+        } else {
+            transitions.insert(transition, 1);
+        }
     }
 
+    if first_transition.is_empty() {
+        panic!("Failed to find a sequence's first transition!")
+    }
     transitions
 }
 
+fn compute_next_instruction_set(
+    transitions: &HashMap<String, u64>,
+    translations: &HashMap<String, String>,
+) -> HashMap<String, u64> {
+    let mut next_transitions: HashMap<String, u64> = HashMap::new();
+
+    for (transition, num_transitions) in transitions {
+        let mut translation_sequence = translations.get(transition).unwrap().clone();
+        translation_sequence = vec!["A", translation_sequence.as_str(), "A"]
+            .into_iter()
+            .collect();
+
+        for i in 0..translation_sequence.len() - 1 {
+            let mut transition = String::new();
+            let translation: Vec<char> = translation_sequence.chars().collect();
+            transition.push(translation[i]);
+            transition.push(translation[i + 1]);
+
+            if let Some(occurances) = next_transitions.get_mut(&transition) {
+                *occurances += num_transitions;
+            } else {
+                next_transitions.insert(transition, *num_transitions);
+            }
+        }
+    }
+
+    next_transitions
+}
+
+fn compute_length_from_transitions(transitions: &HashMap<String, u64>) -> u64 {
+    let mut len: u64 = 0;
+    for (_transition, occurances) in transitions {
+        len += occurances;
+    }
+    len
+}
 
 fn main() {
     let transitions = define_transitions();
     let translations = define_translations(&transitions);
-    for i in 0..transitions.len() {
-        // println!("{} : {}", transitions[i], translations[i]);
-    }
-    let sequence = "<AAA>>>^^AA^>^A^>^<A<^<^<A>^<^";
-    let extracted_transitions = extract_transitions_from_sequence(&sequence);
-    for transition in extracted_transitions {
-        println!("{}", transition);
+    let sequence = "<^<^";
 
+    let mut transitions = extract_transitions_from_sequence(sequence);
+    for i in 0..25 {
+        transitions = compute_next_instruction_set(&transitions, &translations);
+        println!("Number of instructions: {}", compute_length_from_transitions(&transitions));
     }
 
-
+    let mut len = 0;
+    println!("{}", len);
+    len = 0;
+    
+    /* -------------------------------------------------------------------------------- */
 
     // let numpad_sequences = load_button_sequences(_INPUT);
 
-//     let mut final_sequences: Vec<String> = Vec::new();
-//     for sequence_1 in &numpad_sequences {
-//         let numpad_sequence = get_sequence_from_keypad(&sequence_1, Keypad::Numerical);
-//         // let numpad_sequence = "<^<^".to_string();
-//         let mut dirpad_sequences: Vec<String> = Vec::new();
+    //     let mut final_sequences: Vec<String> = Vec::new();
+    //     for sequence_1 in &numpad_sequences {
+    //         let numpad_sequence = get_sequence_from_keypad(&sequence_1, Keypad::Numerical);
+    //         let numpad_sequence = "<^<^".to_string();
+    //         let mut dirpad_sequences: Vec<String> = Vec::new();
 
-//         let mut next_sequence = numpad_sequence.clone();
-//         println!("{}", next_sequence);
-//         println!("{}", next_sequence.len());
-//         for _i in 0..2 {
-//             next_sequence = (get_sequence_from_keypad(&next_sequence, Keypad::Directional));
-//             dirpad_sequences.push(next_sequence.clone());
+    //         let mut next_sequence = numpad_sequence.clone();
+    //         println!("{}", next_sequence);
+    //         println!("{}", next_sequence.len());
+    //         for _i in 0..20 {
+    //             next_sequence = (get_sequence_from_keypad(&next_sequence, Keypad::Directional));
+    //             dirpad_sequences.push(next_sequence.clone());
 
-//             println!("{}", next_sequence);
-//             println!("{}", next_sequence.len());
-//         }
-//         println!()i;
-//         final_sequences.push(dirpad_sequences.last().unwrap().clone());
-//     }
+    //             // println!("{}", next_sequence);
+    //             println!("{}", next_sequence.len());
+    //         }
+    //         println!();
+    //         final_sequences.push(dirpad_sequences.last().unwrap().clone());
+    //     }
 
-//     // Get the complexity
-//     let complexity = compute_complexity(numpad_sequences, final_sequences);
-//     println!("Total complexity: {}", complexity)
+    //     // Get the complexity
+    //     let complexity = compute_complexity(numpad_sequences, final_sequences);
+    //     println!("Total complexity: {}", complexity)
 }
 
 #[test]
