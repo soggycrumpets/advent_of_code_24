@@ -149,7 +149,7 @@ fn navigate_keypad(
     // Try moving in directions that bring the robot immediately closer to the target button.
     next_position = position.east(1);
     if position.x < target.x && position_to_button(next_position, keypad) != '\0' {
-        sequence.push('>');
+        sequence.push('A');
         navigate_keypad(next_position, input, progress, keypad, sequence, sequences);
         sequence.pop();
     }

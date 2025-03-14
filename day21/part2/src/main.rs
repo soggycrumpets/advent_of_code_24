@@ -230,6 +230,20 @@ fn compute_complexity(numpad_sequences: Vec<String>, final_sequences: Vec<String
     complexity as i32
 }
 
+fn compute_complexity_mk2(numpad_codes: Vec<String>, final_sequence_lengths: Vec<u64>) -> u64 {
+    let mut complexity = 0;
+    
+    let mut lengths_iter = final_sequence_lengths.into_iter();
+    
+    for numpad_code in &numpad_codes {
+        let mut code = numpad_code.clone();
+        code.retain(|c| c.is_numeric());
+        let len = lengths_iter.next().unwrap();
+        complexity += (code.parse::<u64>().unwrap()) * len;
+    }
+    complexity 
+}
+
 // A transition is a string of two characters describing the transition from one instruction to another
 fn define_transitions() -> Vec<String> {
     let mut transitions: Vec<String> = Vec::new();
@@ -325,47 +339,27 @@ fn compute_length_from_transitions(transitions: &HashMap<String, u64>) -> u64 {
 }
 
 fn main() {
+    let numpad_codes = load_button_sequences(_INPUT);
     let transitions = define_transitions();
     let translations = define_translations(&transitions);
-    let sequence = "<^<^";
 
-    let mut transitions = extract_transitions_from_sequence(sequence);
-    for i in 0..25 {
-        transitions = compute_next_instruction_set(&transitions, &translations);
-        println!("Number of instructions: {}", compute_length_from_transitions(&transitions));
+    let mut instruction_set_lengths: Vec<u64> = Vec::new();
+
+    for code in &numpad_codes {
+        let sequence = get_sequence_from_keypad(&code, Keypad::Numerical);
+
+        let mut transitions = extract_transitions_from_sequence(&sequence);
+        for _i in 0..25 {
+            transitions = compute_next_instruction_set(&transitions, &translations);
+          
+        }
+        // Store the length of the final instruction set
+        instruction_set_lengths.push(compute_length_from_transitions(&transitions));
     }
 
-    let mut len = 0;
-    println!("{}", len);
-    len = 0;
-    
-    /* -------------------------------------------------------------------------------- */
-
-    // let numpad_sequences = load_button_sequences(_INPUT);
-
-    //     let mut final_sequences: Vec<String> = Vec::new();
-    //     for sequence_1 in &numpad_sequences {
-    //         let numpad_sequence = get_sequence_from_keypad(&sequence_1, Keypad::Numerical);
-    //         let numpad_sequence = "<^<^".to_string();
-    //         let mut dirpad_sequences: Vec<String> = Vec::new();
-
-    //         let mut next_sequence = numpad_sequence.clone();
-    //         println!("{}", next_sequence);
-    //         println!("{}", next_sequence.len());
-    //         for _i in 0..20 {
-    //             next_sequence = (get_sequence_from_keypad(&next_sequence, Keypad::Directional));
-    //             dirpad_sequences.push(next_sequence.clone());
-
-    //             // println!("{}", next_sequence);
-    //             println!("{}", next_sequence.len());
-    //         }
-    //         println!();
-    //         final_sequences.push(dirpad_sequences.last().unwrap().clone());
-    //     }
-
-    //     // Get the complexity
-    //     let complexity = compute_complexity(numpad_sequences, final_sequences);
-    //     println!("Total complexity: {}", complexity)
+    // Get the complexity
+    let complexity = compute_complexity_mk2(numpad_codes, instruction_set_lengths);
+    println!("Total complexity: {}", complexity)
 }
 
 #[test]
