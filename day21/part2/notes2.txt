@@ -1,4 +1,103 @@
-Here's a hypothesis for part2:
+Problem: need to find a way to perform bulk computations on one instruction set to get to the next.
 
-Every numpad instruction has a constant growth rate.
-When you take the growth of the entire instruction set, there is no consistent rate, although you could approximate it as ~2.5x/iter
+Hypotheses: Perhaps each instruction expands out in the same way in each iteration.
+    If we start with each type of button press and 
+    > => vA
+    < => v<<A 
+    ^ => <A
+    v => <vA
+    A => A
+
+    This would be great, because we would have a 1:1 translation from one instruction set to the next.
+    We could express in a compressed format:
+    a(A) + b(v)  + c(>) + d(^) + e(<)
+    Where a, b, c, d, e are constants.
+
+    Then the next instruction set would be:
+    a(A) + b(<VVA) + c(vA) + d(<A) + e(v<<A)
+    Which could easily be expressed in the original format! 
+    We could perform the same computations over and over again until we get to our whatever-th iteration.
+
+Unfortunately, this method breaks down as soon as we get past the first instruction. 
+    Individual instructions DO NOT have a 1:1 correspondance with the next robot's instructions!
+
+But what if there's something else that DOES have a 1:1 correspondance?
+
+Instead of looking at individual instructions, let's look at transitions between instructions,
+    and how those translate to the next robot's instructions:
+    ^< => v<
+    <^ => >^
+    A< => v<<
+    etc.
+
+Consider this sequence:
+    <^<^
+
+We can rewrite this as a set of transitions
+    <^ + ^< + <^
+
+except that we need to remember that we start at the A button, so it actually looks like this:
+    A<
+    + <^ + ^< + <^
+    =
+    A<
+    + 2(<^) + ^<
+
+We should keep track separately of what our first transition is.
+    If we don't know the first movement of our sequence, we won't be able to determine the first move for our next sequence.
+    This should be the only part that is order-dependent.
+
+The instruction set length is easy to determine from this format. It's simply the total number of transitions in the sequence.
+
+Compare our expression to the compressed format from earlier. Instead of:
+    a(A) + b(v)  + c(>) + d(^) + e(<)
+
+We have:
+    a(<^)+ b(^<) + c(A<) + 3(transition4) + ...
+    Where in our specific case, a would be 1, b would be 2, and every other constant would be 0.
+    Since we have 5 different instructions, there would be 5*5 = 25 transitions in this equation,
+        each with their own constant.
+
+    But this isn't quite enough to describe our instruction set. We haven't yet included the initial transition - 
+    we have to remember that we always start at the A button.
+
+    So the question is now, how do we determine what the next set of instructions will be in this compressed form?
+
+    Remember the examples from before of how these will translate:
+    A< => v<<
+    ^< => v<
+    <^ => >^
+
+    but keep in mind that there is an A button press before and after you move between buttons, the output looks more like this:
+    A< => Av<<A
+    ^< => Av<A
+    <^ => A>^A
+
+    which each break down into sets of transitions:
+    A< => Av + v< + << + <A
+    ^< => Av + v< + <A
+    <^ => A> + >^ + ^A (don't forget that we have two of these in our example)
+    
+   Remember that we are keeping track of our first transition, Av, separately. The first transition that this yields will become
+   the first transition for our next sequence. A< : Av
+   To signify that Av is our first transition, it will be marked with a star (*Av)
+
+    So our next instruction set will be:
+    *Av + v< + << + <A
+    Av + v< + <A +
+    2(A> + >^ + ^A)
+
+    And the length of the sequence will be:
+    4 +
+    3 +
+    2(3)
+    = 13
+
+    If we go and compute the actual sequences, they look like this:
+    <^<^
+    v<<A>^Av<A>^A
+
+    So, keeping in mind that the second sequence starts at A, you can translate it to a set of transitions like this:
+    *Av + v< + << + <A + A> + >^ + ^A + Av + v< + <A + A> + >^ + ^A
+
+    which exactly matches the set that we calculated before!
