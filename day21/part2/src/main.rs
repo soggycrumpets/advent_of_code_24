@@ -313,6 +313,7 @@ fn compute_next_instruction_set(
             .into_iter()
             .collect();
 
+        // Break down the translation sequence into a set of transitions
         for i in 0..translation_sequence.len() - 1 {
             let mut transition = String::new();
             let translation: Vec<char> = translation_sequence.chars().collect();

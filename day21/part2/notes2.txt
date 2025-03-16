@@ -78,12 +78,8 @@ We have:
     ^< => Av + v< + <A
     <^ => A> + >^ + ^A (don't forget that we have two of these in our example)
     
-   Remember that we are keeping track of our first transition, Av, separately. The first transition that this yields will become
-   the first transition for our next sequence. A< : Av
-   To signify that Av is our first transition, it will be marked with a star (*Av)
-
     So our next instruction set will be:
-    *Av + v< + << + <A
+    Av + v< + << + <A
     Av + v< + <A +
     2(A> + >^ + ^A)
 
@@ -97,7 +93,7 @@ We have:
     <^<^
     v<<A>^Av<A>^A
 
-    So, keeping in mind that the second sequence starts at A, you can translate it to a set of transitions like this:
-    *Av + v< + << + <A + A> + >^ + ^A + Av + v< + <A + A> + >^ + ^A
+    So, keeping in mind that the second sequence starts with a transition form A, you can translate it to a set of transitions like this:
+    Av + v< + << + <A + A> + >^ + ^A + Av + v< + <A + A> + >^ + ^A
 
     which exactly matches the set that we calculated before!
