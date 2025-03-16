@@ -9,10 +9,10 @@ use std::rc::Rc;
 const _INPUT: &str = "input.txt";
 const _EXAMPLE: &str = "example.txt";
 
-#[derive(PartialEq, Debug, Eq, Hash)]
-struct Gate<> {
+#[derive(PartialEq, Debug, Eq)]
+struct Gate {
     name: String,
-    components: Option<[Rc<Gate>; 2]>,
+    components: Option<[Rc<RefCell<Gate>>; 2]>,
     operation: Option<Operation>,
     value: Option<bool>,
 }
@@ -33,17 +33,13 @@ impl Gate {
         }
 
         let gates = self.components.as_mut().unwrap();
-        let (gate1, gate2) = gates.split_at_mut(0);
-
-        let gate1 = Rc::get_mut(&mut gate1[0]).unwrap();
-        let gate2 = Rc::get_mut(&mut gate2[0]).unwrap();
 
         // Recursively evaluate all prerequisite gates
-        if let None = gate1.value {
-            gate1.evaluate();
+        if let None = gates[0].borrow().value {
+            gates[0].borrow_mut().evaluate();
         }
-        if let None = gate2.value {
-            gate2.evaluate();
+        if let None = gates[1].borrow().value {
+            gates[1].borrow_mut().evaluate();
         }
 
         if let None = &self.operation {
@@ -51,9 +47,18 @@ impl Gate {
         }
 
         match self.operation.unwrap() {
-            Operation::AND => self.value = Some(gates[0].value.unwrap() & gates[1].value.unwrap()),
-            Operation::OR => self.value = Some(gates[0].value.unwrap() | gates[1].value.unwrap()),
-            Operation::XOR => self.value = Some(gates[0].value.unwrap() ^ gates[1].value.unwrap()),
+            Operation::AND => {
+                self.value =
+                    Some(gates[0].borrow().value.unwrap() & gates[1].borrow().value.unwrap());
+            }
+            Operation::OR => {
+                self.value =
+                    Some(gates[0].borrow().value.unwrap() | gates[1].borrow().value.unwrap())
+            }
+            Operation::XOR => {
+                self.value =
+                    Some(gates[0].borrow().value.unwrap() ^ gates[1].borrow().value.unwrap())
+            }
         }
     }
 }
@@ -65,7 +70,7 @@ enum Operation {
     XOR,
 }
 
-fn load_gates(name: &str) -> HashMap<&str, Rc<Gate>> {
+fn load_gates(name: &str) -> HashMap<String, Rc<RefCell<Gate>>> {
     let path = Path::new(name);
     let mut file = File::open(&path).unwrap();
     let mut data_string: String = String::new();
@@ -73,7 +78,7 @@ fn load_gates(name: &str) -> HashMap<&str, Rc<Gate>> {
 
     let mut data_lines = data_string.lines();
 
-    let mut gates: HashMap<&str, Rc<Gate>> = HashMap::new();
+    let mut gates: HashMap<String, Rc<RefCell<Gate>>> = HashMap::new();
 
     // Initialize the set of gates with predetermined values
     loop {
@@ -89,14 +94,14 @@ fn load_gates(name: &str) -> HashMap<&str, Rc<Gate>> {
 
         let mut gate = Gate::new(name.to_string());
         gate.value = Some(value);
-        gates.insert(name, Rc::new(gate));
+        gates.insert(name.to_string(), Rc::new(RefCell::new(gate)));
     }
 
     // Declare the rest of the gates
     for line in data_lines.clone() {
         let name = line.split_whitespace().last().unwrap();
         let gate = Gate::new(name.to_string());
-        gates.insert(name, Rc::new(gate));
+        gates.insert(name.to_string(), Rc::new(RefCell::new(gate)));
     }
 
     // Initialize the rest of the gates
@@ -110,12 +115,13 @@ fn load_gates(name: &str) -> HashMap<&str, Rc<Gate>> {
             "AND" => Operation::AND,
             "OR" => Operation::OR,
             "XOR" => Operation::XOR,
-            _ => panic!("Tried to parse invalid gate: {}", operation_string) 
+            _ => panic!("Tried to parse invalid gate: {}", operation_string),
         };
 
-        let mut gate = gates.get_mut(strings[4]).unwrap();
-        let gate = Rc::get_mut(gate).unwrap();
-        gate.components = Some([component1, component2]);
+        print!("Strings[4]: {}", strings[4]);
+        let gate = gates.get(strings[4]).unwrap();
+        println!("| {}", strings[4]);
+        gate.borrow_mut().components = Some([component1, component2]);
     }
 
     gates
