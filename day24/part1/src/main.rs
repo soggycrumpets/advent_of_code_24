@@ -25,42 +25,6 @@ impl Gate {
             value: None,
         }
     }
-
-    fn evaluate(&mut self) {
-        // Gate has already been evaluated
-        if let Some(_) = self.value {
-            panic!("Cannot evaluate a gate that has already been evaluated!");
-        }
-
-        let gates = self.components.as_mut().unwrap();
-
-        // Recursively evaluate all prerequisite gates
-        if let None = gates[0].borrow().value {
-            gates[0].borrow_mut().evaluate();
-        }
-        if let None = gates[1].borrow().value {
-            gates[1].borrow_mut().evaluate();
-        }
-
-        if let None = &self.operation {
-            panic!("Tried to evaluate a gate with no operation!");
-        }
-
-        match self.operation.unwrap() {
-            Operation::AND => {
-                self.value =
-                    Some(gates[0].borrow().value.unwrap() & gates[1].borrow().value.unwrap());
-            }
-            Operation::OR => {
-                self.value =
-                    Some(gates[0].borrow().value.unwrap() | gates[1].borrow().value.unwrap())
-            }
-            Operation::XOR => {
-                self.value =
-                    Some(gates[0].borrow().value.unwrap() ^ gates[1].borrow().value.unwrap())
-            }
-        }
-    }
 }
 
 #[derive(PartialEq, Clone, Copy, Debug, Eq, Hash)]
@@ -69,6 +33,34 @@ enum Operation {
     OR,
     XOR,
 }
+
+fn evaluate(gate: &Rc<RefCell<Gate>>) -> bool {
+
+        // Gate has already been evaluated
+        if let Some(bool) = gate.borrow().value {
+            return bool
+        }
+
+        let binding = gate.borrow();
+        let gates = binding.components.as_ref().unwrap();
+
+        if let None = &gate.borrow().operation {
+            panic!("Tried to evaluate a gate with no operation!");
+        }
+
+        // Recursively evaluate all prerequisite gates
+        match gate.borrow().operation.unwrap() {
+            Operation::AND => {
+                    return evaluate(&gates[0]) & evaluate(&gates[1]);
+            }
+            Operation::OR => {
+                    return evaluate(&gates[0]) | evaluate(&gates[1]);
+            }
+            Operation::XOR => {
+                    return evaluate(&gates[0]) ^ evaluate(&gates[1]);
+            }
+        }
+    }
 
 fn load_gates(name: &str) -> HashMap<String, Rc<RefCell<Gate>>> {
     let path = Path::new(name);
@@ -118,15 +110,55 @@ fn load_gates(name: &str) -> HashMap<String, Rc<RefCell<Gate>>> {
             _ => panic!("Tried to parse invalid gate: {}", operation_string),
         };
 
-        print!("Strings[4]: {}", strings[4]);
-        let gate = gates.get(strings[4]).unwrap();
-        println!("| {}", strings[4]);
-        gate.borrow_mut().components = Some([component1, component2]);
+        let mut gate = gates.get(strings[4]).unwrap().borrow_mut();
+        gate.components = Some([component1, component2]);
+        gate.operation = Some(operation);
     }
 
     gates
 }
 
+fn evaluate_gates(gates: &HashMap<String, Rc<RefCell<Gate>>>) -> u64{
+
+    let mut indeces: Vec<usize> = Vec::new();
+    let mut scrambled_values: Vec<bool> = Vec::new();
+       for (name, gate) in gates {
+        if !name.starts_with('z') {
+            continue
+        }        
+        let mut index: String = name.clone();
+        index.retain(|c| c.is_numeric());
+        indeces.push(index.parse().unwrap());
+        scrambled_values.push(evaluate(&gate));
+    }
+
+    let mut values: Vec<bool> = vec![false; indeces.len()];
+    for i in 0..values.len() {
+        values[indeces[i]] = scrambled_values[i];
+    }
+    values.reverse();
+
+    let mut values_string: String = String::new();
+    for value in values {
+        if value {
+            values_string.push('1')
+        } else {
+            values_string.push('0');
+        }
+    }
+
+    u64::from_str_radix(values_string.as_str(), 2).unwrap()
+}
+
 fn main() {
+    let gates = load_gates(_INPUT);
+  
+    println!("{}", evaluate_gates(&gates));
+}
+
+#[test]
+fn test_example() {
     let gates = load_gates(_EXAMPLE);
+  
+    assert_eq!(evaluate_gates(&gates), 2024);
 }
