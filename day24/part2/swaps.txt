@@ -1,4 +1,6 @@
-gjc qjj
-z17 wmp
-z39 qsb
+Through much trial and tribulation, I have hackishly assembled the list of output wires that must be swapped.
+
+gjc, qjj
+z17, wmp
+z39, qsb
 z26, gvm

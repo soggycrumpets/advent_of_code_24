@@ -2,9 +2,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
-use std::mem::swap;
 use std::path::Path;
-use std::process::id;
 
 const _INPUT: &str = "input.txt";
 const _EXAMPLE: &str = "example.txt";
@@ -222,8 +220,6 @@ fn verify_swap(
 
 fn swap_wires_until_match(
     gates: &mut HashMap<String, Vec<String>>,
-    // gate: &str,
-    // target_eqns: &Vec<Vec<String>>,
     gates_with_eqns: &Vec<String>,
     z_gates: &Vec<String>,
     index: usize,
@@ -265,14 +261,16 @@ fn main() {
     }
 
     {
+        // Manually input the answer to the problem
         switch_eqns("gjc", "qjj", &mut gates);
         switch_eqns("z17", "wmp", &mut gates);
         switch_eqns("z39", "qsb", &mut gates);
         switch_eqns("z26", "gvm", &mut gates);
     }
 
+    // Do a bunch of useless stuff
     z_gates = sort_z_gates(z_gates);
-    let mut ideal_base_eqns = get_ideal_base_eqns(&z_gates, &gates);
+    let ideal_base_eqns = get_ideal_base_eqns(&z_gates, &gates);
 
     let gates_with_eqns: Vec<String> = filter_base_gates(&gates);
     let mut wire_swaps: Vec<String> = Vec::new();
@@ -308,9 +306,6 @@ fn main() {
         }
         println! {"{}", verify_swap(&mut gates, &z_gates, i, &ideal_base_eqns)};
     }
-    let mut explored_gates: HashSet<String> = HashSet::new();
-    // _print_base_eqns(&deep_sort(extract_base_eqns(&z_gates[z_gates.len()-1], &gates, &mut explored_gates)));
-    // _print_base_eqns(&ideal_base_eqns[ideal_base_eqns.len()-1]);
     wire_swaps.push("gjc".to_string());
     wire_swaps.push("z17".to_string());
     wire_swaps.push("z39".to_string());
